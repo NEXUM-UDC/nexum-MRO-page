@@ -482,378 +482,46 @@
 
 <script>var MRO_DATA = null;</script>
 <script src="data.js"></script>
-<script>
-// ══════════════════════════════════════════
-// DATA — loads from data.js (real emails) or falls back to demo
-// ══════════════════════════════════════════
-const DEMO_DATA = [
-  {
-    customer: "Korean Air",
-    rfq: "123457", ro: "RO-121212", pn: "CFM56-7B", sn: "876543210",
-    stage: "RFQ/capability request",
-    summary: "Customer requests repair capability assessment and quote for CFM56-7B engine part.",
-    date: "Sun, 28 Jun 2026 14:18:22 -0500",
-    from: "ops@koreanair.com",
-    body: "Please check repair capabilities for PN CFM56-7B SN 876543210. RFQ 123457.",
-    messages: [
-      { dir:"inbound",  from:"ops@koreanair.com",     time:"14:18", body:"Please check repair capabilities for PN CFM56-7B SN 876543210. RFQ 123457." }
-    ],
-    docs: []
-  },
-  {
-    customer: "Lufthansa Technik",
-    rfq: "445521", ro: "RO-030303", pn: "CFM56-7B", sn: "987654321",
-    stage: "RFQ/capability request",
-    summary: "Customer inquires about repair capabilities and quote for CFM56-7B.",
-    date: "Sun, 28 Jun 2026 14:23:27 -0500",
-    from: "james.r@lufthansa-technik.com",
-    body: "Hi there, we removed a CFM56-7B from one of our 737s last week, serial is 987654321. Can you let us know your capabilities?",
-    messages: [
-      { dir:"inbound", from:"james.r@lufthansa-technik.com", time:"14:23", body:"Hi there, we removed a CFM56-7B from one of our 737s last week, serial is 987654321. Can you let us know your capabilities and roughly what we're looking at cost-wise?" }
-    ],
-    docs: []
-  },
-  {
-    customer: "Emirates Engineering",
-    rfq: null, ro: "RO-020202", pn: "V2500-A5", sn: "112233445",
-    stage: "Part shipped",
-    summary: "Part V2500-A5 shipped via FedEx, tracking 7489 2031 9584.",
-    date: "Sun, 28 Jun 2026 14:23:55 -0500",
-    from: "tony@emirates-engineering.com",
-    body: "Just a heads up, we dropped the part in the mail yesterday via FedEx priority. Tracking number is 7489 2031 9584.",
-    messages: [
-      { dir:"inbound", from:"tony@emirates-engineering.com", time:"14:23", body:"Just a heads up, we dropped the part in the mail yesterday via FedEx priority. Tracking number is 7489 2031 9584. Should be with you Thursday or Friday." }
-    ],
-    docs: [{ name:"Removal Tag — V2500-A5", tag:"ATTACHED" }, { name:"PO-778899.pdf", tag:"ATTACHED" }]
-  },
-  {
-    customer: "Lufthansa Technik",
-    rfq: null, ro: "RO-030303", pn: "CFM56-7B", sn: null,
-    stage: "Quote approval",
-    summary: "Customer approves repair quotation and authorizes work to proceed.",
-    date: "Sun, 28 Jun 2026 14:25:02 -0500",
-    from: "james.r@lufthansa-technik.com",
-    body: "Approved — go ahead with the repair. PO 445521 covers it. Let us know when it's done. James",
-    messages: [
-      { dir:"inbound", from:"james.r@lufthansa-technik.com", time:"14:18", body:"Hi there, we removed a CFM56-7B from one of our 737s last week. Can you give us a quote?" },
-      { dir:"outbound", from:"example.mro.email@gmail.com",  time:"14:22", body:"Hi James, confirmed capability on CFM56-7B. Sending firm quote shortly after teardown." },
-      { dir:"inbound", from:"james.r@lufthansa-technik.com", time:"14:25", body:"Approved — go ahead with the repair. PO 445521 covers it. Let us know when it's done." }
-    ],
-    docs: [{ name:"Quotation-RO030303.pdf", tag:"ISSUED" }]
-  },
-  {
-    customer: "Delta TechOps",
-    rfq: "123456", ro: "RO-030303", pn: "CFM56-7B", sn: "987654321",
-    stage: "Quote issued",
-    summary: "MRO issued firm quotation for Stage 1-3 blade replacement.",
-    date: "Sun, 28 Jun 2026 14:29:51 -0500",
-    from: "maint@delta-techops.com",
-    body: "Please find below our firm quotation. Total Cost: USD $48,500. TAT: 21 business days.",
-    messages: [
-      { dir:"inbound", from:"maint@delta-techops.com",          time:"13:55", body:"Please check repair capabilities for CFM56-7B SN 987654321, RFQ 123456." },
-      { dir:"outbound", from:"example.mro.email@gmail.com",     time:"14:10", body:"Confirmed capability. Part received, teardown complete. Firm quote to follow." },
-      { dir:"inbound", from:"quotes@examplemro.com",            time:"14:29", body:"Firm quotation: Stage 1-3 blade replacement, combustion liner repair. TAT 21 days. Total USD $48,500. Valid 30 days." }
-    ],
-    docs: [{ name:"Quotation-RO030303-Delta.pdf", tag:"ISSUED" }, { name:"Teardown Report.pdf", tag:"INTERNAL" }]
-  }
-];
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const parsedEmails = (MRO_DATA && MRO_DATA.length) ? [...MRO_DATA] : [...DEMO_DATA];
+const firebaseConfig = {
+  apiKey: "AIzaSyA9z1eM2TQyMGC-YSupaYksXb2bThE_ZTk",
+  authDomain: "nexum-7533f.firebaseapp.com",
+  projectId: "nexum-7533f",
+  storageBucket: "nexum-7533f.firebasestorage.app",
+  messagingSenderId: "754154560620",
+  appId: "1:754154560620:web:de57e08f3b004084d68c49"
+};
 
-// ══════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════
-let currentCustomer = null;
-let currentStage    = null;
-let currentRO       = null;
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
-// stage definitions — order matches your flowchart
-const STAGES = [
-  { key:"RFQ/capability request", label:"01 — RFQ",           name:"Request for Quote",     desc:"Capability checks & initial quotes" },
-  { key:"Part shipped",           label:"02 — SHIPPED",       name:"Part Shipped",          desc:"Inbound tracking & receiving" },
-  { key:"Quote issued",           label:"03 — QUOTE",         name:"Quote Issued",          desc:"Firm quotes pending approval" },
-  { key:"Quote approval",         label:"04 — APPROVAL",      name:"Quote Approval",        desc:"Customer approvals & denials" },
-  { key:"Repair complete",        label:"05 — COMPLETE",      name:"Repair Complete",       desc:"8130-3 / Form 1 & return shipment" },
-];
+onSnapshot(collection(db, "emails"), (snapshot) => {
+  snapshot.docChanges().forEach(change => {
+    if (change.type === "added") {
+      const e = change.doc.data();
+      if (!e.messages) e.messages = [{dir:"inbound", from:e.from||"", time:e.date||"", body:e.body||""}];
+      if (!e.docs) e.docs = [];
 
-// ══════════════════════════════════════════
-// UTILITIES
-// ══════════════════════════════════════════
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  document.getElementById("toastMsg").textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 3500);
-}
-
-function goScreen(n) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById("screen" + n).classList.add("active");
-  updateBreadcrumb(n);
-  if (n === 1) renderCustomers();
-}
-
-function updateBreadcrumb(n) {
-  const bc = document.getElementById("breadcrumb");
-  if (n === 1) {
-    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span>`;
-  } else if (n === 2) {
-    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span>
-      <span class="sep">/</span>
-      <span class="crumb">${currentCustomer}</span>`;
-  } else if (n === 3) {
-    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span>
-      <span class="sep">/</span>
-      <span class="crumb" onclick="goScreen(2)">${currentCustomer}</span>
-      <span class="sep">/</span>
-      <span class="crumb">${currentStage}</span>`;
-  }
-}
-
-// ══════════════════════════════════════════
-// SCREEN 1 — CUSTOMERS
-// ══════════════════════════════════════════
-function getCustomers() {
-  const map = {};
-  parsedEmails.forEach(e => {
-    if (!map[e.customer]) map[e.customer] = { name: e.customer, emails: [] };
-    map[e.customer].emails.push(e);
-  });
-  return Object.values(map);
-}
-
-function renderCustomers(filter = "") {
-  const grid = document.getElementById("customerGrid");
-  const customers = getCustomers().filter(c =>
-    c.name.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  if (!customers.length) {
-    grid.innerHTML = `<div class="empty">No customers found</div>`;
-    return;
-  }
-
-  grid.innerHTML = customers.map(c => {
-    const stageCounts = {};
-    c.emails.forEach(e => {
-      stageCounts[e.stage] = (stageCounts[e.stage] || 0) + 1;
-    });
-    const pills = Object.entries(stageCounts)
-      .map(([s, n]) => `<span class="count-pill has-items">${n} ${s.split("/")[0].trim().toUpperCase()}</span>`)
-      .join("");
-    return `
-      <div class="customer-card" id="card-${c.name.replace(/\s/g,'-')}" onclick="selectCustomer('${c.name}')">
-        <div class="customer-name">${c.name}</div>
-        <div class="customer-meta">${c.emails.length} repair order${c.emails.length !== 1 ? "s" : ""}</div>
-        <div class="customer-count">${pills}</div>
-      </div>`;
-  }).join("");
-}
-
-function filterCustomers() {
-  renderCustomers(document.getElementById("customerSearch").value);
-}
-
-function selectCustomer(name) {
-  currentCustomer = name;
-  renderStages();
-  goScreen(2);
-}
-
-// ══════════════════════════════════════════
-// SCREEN 2 — STAGES
-// ══════════════════════════════════════════
-function renderStages() {
-  document.getElementById("screen2Heading").textContent = currentCustomer;
-  const emails = parsedEmails.filter(e => e.customer === currentCustomer);
-
-  // updates count
-  const newCount = emails.filter(e => e.messages && e.messages[e.messages.length-1]?.dir === "inbound").length;
-  document.getElementById("updatesSubtext").textContent = `${newCount} awaiting response`;
-
-  const grid = document.getElementById("stageGrid");
-  grid.innerHTML = STAGES.map(s => {
-    const count = emails.filter(e => e.stage === s.key).length;
-    return `
-      <div class="stage-card" onclick="selectStage('${s.key}', '${s.name}')">
-        <div class="stage-label">${s.label}</div>
-        <div class="stage-name">${s.name}</div>
-        <div class="stage-badge">${count > 0 ? count + " active" : "— none"}</div>
-      </div>`;
-  }).join("");
-}
-
-function openUpdates() {
-  // show all emails for this customer, newest first, filtered to awaiting response
-  const emails = parsedEmails.filter(e => e.customer === currentCustomer);
-  if (!emails.length) return;
-  openRO(emails[0]); // open most recent as a starting point
-}
-
-// ══════════════════════════════════════════
-// SCREEN 3 — RO LIST
-// ══════════════════════════════════════════
-function selectStage(stageKey, stageName) {
-  currentStage = stageName;
-  const emails = parsedEmails.filter(e => e.customer === currentCustomer && e.stage === stageKey);
-
-  document.getElementById("screen3Heading").textContent = stageName;
-
-  const list = document.getElementById("roList");
-  if (!emails.length) {
-    list.innerHTML = `<div class="empty">No repair orders at this stage</div>`;
-  } else {
-    list.innerHTML = emails.map(e => {
-      const lastMsg = e.messages[e.messages.length - 1];
-      const needsReply = lastMsg?.dir === "inbound";
-      const statusClass = needsReply ? "status-action" : "status-open";
-      const statusText  = needsReply ? "REPLY NEEDED" : "OPEN";
-      const dateStr = e.date ? e.date.split(" ").slice(1,4).join(" ") : "—";
-      return `
-        <div class="ro-row" onclick="openRO(parsedEmails.find(x=>x.ro==='${e.ro}'&&x.customer==='${e.customer}'&&x.stage==='${e.stage}'))">
-          <div class="ro-number">${e.ro}</div>
-          <div class="ro-pn">PN: ${e.pn || "—"} &nbsp;|&nbsp; SN: ${e.sn || "—"}</div>
-          <div class="ro-date">${dateStr}</div>
-          <div class="ro-status ${statusClass}">${statusText}</div>
-        </div>`;
-    }).join("");
-  }
-
-  goScreen(3);
-}
-
-// ══════════════════════════════════════════
-// MODAL — RO DETAIL
-// ══════════════════════════════════════════
-function openRO(e) {
-  if (!e) return;
-  currentRO = e;
-
-  document.getElementById("modalRO").textContent = e.ro || "—";
-  document.getElementById("modalCustomer").textContent = `${e.customer} · ${e.stage}`;
-
-  // info fields
-  document.getElementById("infoGrid").innerHTML = [
-    ["Part Number", e.pn || "—"],
-    ["Serial Number", e.sn || "—"],
-    ["RFQ", e.rfq || "—"],
-    ["Date Received", e.date ? e.date.split(" ").slice(1,4).join(" ") : "—"],
-    ["Stage", e.stage],
-    ["Customer Contact", e.from || "—"],
-  ].map(([k,v]) => `
-    <div class="info-field">
-      <label>${k}</label>
-      <div class="val">${v}</div>
-    </div>`).join("");
-
-  // docs
-  const dl = document.getElementById("docsList");
-  if (e.docs && e.docs.length) {
-    dl.innerHTML = e.docs.map(d => `
-      <div class="doc-row">
-        <div class="doc-name">📄 ${d.name}</div>
-        <div class="doc-tag">${d.tag}</div>
-      </div>`).join("");
-  } else {
-    dl.innerHTML = `<div class="empty" style="padding:16px 0">No documents attached</div>`;
-  }
-
-  // thread
-  document.getElementById("thread").innerHTML = (e.messages || []).map(m => `
-    <div class="message ${m.dir}">
-      <div class="msg-meta">
-        <span class="msg-from">${m.dir === "inbound" ? m.from : "You (Example MRO)"}</span>
-        <span>${m.time}</span>
-      </div>
-      <div class="msg-body">${m.body}</div>
-    </div>`).join("");
-
-  document.getElementById("composeBox").value = "";
-  document.getElementById("modalOverlay").classList.add("open");
-}
-
-function closeModal(e) {
-  if (e.target === document.getElementById("modalOverlay")) closeModalDirect();
-}
-function closeModalDirect() {
-  document.getElementById("modalOverlay").classList.remove("open");
-}
-
-function sendMessage() {
-  const box = document.getElementById("composeBox");
-  const text = box.value.trim();
-  if (!text) return;
-  const thread = document.getElementById("thread");
-  const now = new Date();
-  const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}`;
-  thread.innerHTML += `
-    <div class="message outbound">
-      <div class="msg-meta">
-        <span class="msg-from">You (Example MRO)</span>
-        <span>${time}</span>
-      </div>
-      <div class="msg-body">${text}</div>
-    </div>`;
-  box.value = "";
-  thread.scrollTop = thread.scrollHeight;
-  showToast(`Message sent to ${currentRO?.customer}`);
-}
-
-function draftWithAI() {
-  const box = document.getElementById("composeBox");
-  const e = currentRO;
-  if (!e) return;
-  // simulated AI draft based on stage
-  const drafts = {
-    "RFQ/capability request": `Dear ${e.customer} team,\n\nThank you for your inquiry. We confirm capability on PN ${e.pn || "the referenced part"}. We will proceed with evaluation and provide a firm quotation following teardown and inspection.\n\nEstimated TAT will be communicated with the quote.\n\nBest regards,\nExample MRO`,
-    "Part shipped": `Dear ${e.customer} team,\n\nWe confirm receipt of PN ${e.pn || "the part"} SN ${e.sn || "—"} for RO ${e.ro}. Incoming inspection is underway and we will update you shortly.\n\nBest regards,\nExample MRO`,
-    "Quote issued": `Dear ${e.customer} team,\n\nThank you for your patience. Please find our firm quotation attached for RO ${e.ro}. This quote is valid for 30 days. Please reply with written approval to proceed.\n\nBest regards,\nExample MRO`,
-    "Quote approval": `Dear ${e.customer} team,\n\nThank you for the approval. We will commence work on RO ${e.ro} immediately and provide regular status updates.\n\nBest regards,\nExample MRO`,
-    "Repair complete": `Dear ${e.customer} team,\n\nRO ${e.ro} has been completed. FAA Form 8130-3 and all required documentation are enclosed. The component is ready for return shipment — please confirm your shipping address.\n\nBest regards,\nExample MRO`,
-  };
-  box.value = drafts[e.stage] || `Dear ${e.customer} team,\n\nPlease see the update regarding RO ${e.ro}.\n\nBest regards,\nExample MRO`;
-}
-
-// ══════════════════════════════════════════
-// SIMULATE INCOMING EMAIL (every 15s demo)
-// ══════════════════════════════════════════
-const incomingSimulation = [
-  {
-    customer: "United Airlines",
-    rfq: "889900", ro: "RO-050505", pn: "PW4000", sn: "334455667",
-    stage: "RFQ/capability request",
-    summary: "United requests capability check for PW4000 engine component.",
-    date: new Date().toUTCString(),
-    from: "mro@unitedairlines.com",
-    body: "Hi, can you check capabilities for PW4000 SN 334455667? RFQ 889900.",
-    messages: [
-      { dir:"inbound", from:"mro@unitedairlines.com", time: new Date().getHours()+":"+String(new Date().getMinutes()).padStart(2,"0"), body:"Hi, can you check capabilities for PW4000 SN 334455667? RFQ 889900." }
-    ],
-    docs: []
-  }
-];
-
-let simIndex = 0;
-setTimeout(() => {
-  if (simIndex < incomingSimulation.length) {
-    const newEmail = incomingSimulation[simIndex++];
-    parsedEmails.unshift(newEmail);
-    showToast(`New email from ${newEmail.customer} — ${newEmail.stage}`);
-    // ping the card if on screen 1
-    const grid = document.getElementById("customerGrid");
-    if (document.getElementById("screen1").classList.contains("active")) {
-      renderCustomers();
-      setTimeout(() => {
-        const card = document.getElementById("card-" + newEmail.customer.replace(/\s/g,"-"));
-        if (card) card.classList.add("new-ping");
-      }, 100);
+      const exists = parsedEmails.some(x => x.ro === e.ro && x.date === e.date && x.customer === e.customer);
+      if (!exists) {
+        parsedEmails.unshift(e);
+        showToast(`New email from ${e.customer} — ${e.stage}`);
+        if (document.getElementById("screen1").classList.contains("active")) {
+          renderCustomers();
+          setTimeout(() => {
+            const card = document.getElementById("card-" + (e.customer||"").replace(/\s/g,"-"));
+            if (card) card.classList.add("new-ping");
+          }, 100);
+        }
+      }
     }
-  }
-}, 8000);
+  });
+});
 
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
 renderCustomers();
 </script>
 </body>
