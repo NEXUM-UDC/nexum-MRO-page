@@ -1,0 +1,27 @@
+name: Nexum inbox watcher
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install anthropic firebase-admin
+
+      - name: Run watcher
+        env:
+          MRO_EMAIL:                ${{ secrets.MRO_EMAIL }}
+          MRO_APP_PASSWORD:         ${{ secrets.MRO_APP_PASSWORD }}
+          ANTHROPIC_KEY:            ${{ secrets.ANTHROPIC_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: python backend/watcher.py
