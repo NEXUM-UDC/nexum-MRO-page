@@ -1,4 +1,4 @@
-import imaplib, email, json, os
+import imaplib, email, json, os, traceback
 from email.header import decode_header
 import anthropic
 import firebase_admin
@@ -25,6 +25,13 @@ def decode_field(value):
     return out
 
 
+def normalize_ro(ro):
+    """Normalize RO number for consistent matching — strip prefix, uppercase."""
+    if not ro:
+        return None
+    return str(ro).upper().replace("RO-","").replace("RO","").strip()
+
+
 def ai_extract(subject, body, sender, api_key):
     client = anthropic.Anthropic(api_key=api_key)
     prompt = f"""Extract repair-order details from this aviation MRO email. Return ONLY a JSON object with keys: customer, rfq, ro, pn, sn, stage, summary.
@@ -46,17 +53,13 @@ BODY: {body}"""
 
 
 def main():
-    import traceback
     try:
         EMAIL    = os.environ["MRO_EMAIL"]
         PASSWORD = os.environ["MRO_APP_PASSWORD"]
         ANT_KEY  = os.environ["ANTHROPIC_KEY"]
-        SA_RAW   = os.environ["FIREBASE_SERVICE_ACCOUNT"]
+        SA_JSON  = json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT"])
 
-        print(f"Service account JSON length: {len(SA_RAW)}")
-        SA_JSON = json.loads(SA_RAW)
-        print(f"Project ID: {SA_JSON.get('project_id')}")
-
+        print(f"Project: {SA_JSON.get('project_id')}")
         cred = credentials.Certificate(SA_JSON)
         firebase_admin.initialize_app(cred)
         db = firestore.client()
@@ -72,9 +75,11 @@ def main():
         for num in email_ids:
             typ, msg_data = M.fetch(num, "(RFC822)")
             msg = email.message_from_bytes(msg_data[0][1])
+
             subject = decode_field(msg["Subject"])
             body    = get_body(msg)
             sender  = decode_field(msg["From"])
+
             fields  = ai_extract(subject, body, sender, ANT_KEY)
             fields["date"]     = msg["Date"] or ""
             fields["from"]     = sender
@@ -82,9 +87,47 @@ def main():
             fields["body"]     = body[:500]
             fields["messages"] = [{"dir":"inbound","from":sender,"time":msg["Date"] or "","body":body[:500]}]
             fields["docs"]     = []
-            print(f"Writing to Firestore: {fields.get('customer')} | {fields.get('stage')}")
-            ref = db.collection("emails").add(fields)
-            print(f"Saved with ID: {ref[1].id}")
+
+            ro_raw       = fields.get("ro")
+            ro_norm      = normalize_ro(ro_raw)
+            customer     = fields.get("customer")
+
+            if ro_norm and customer:
+                # search for existing document with same RO and customer
+                existing = db.collection("emails")\
+                    .where("customer","==",customer)\
+                    .limit(10).get()
+
+                matched = None
+                for doc in existing:
+                    d = doc.to_dict()
+                    if normalize_ro(d.get("ro")) == ro_norm:
+                        matched = doc
+                        break
+
+                if matched:
+                    # update existing thread — append message, update stage
+                    new_message = {
+                        "dir":  "inbound",
+                        "from": sender,
+                        "time": fields["date"],
+                        "body": body[:500]
+                    }
+                    matched.reference.update({
+                        "messages": firestore.ArrayUnion([new_message]),
+                        "stage":    fields.get("stage","Unclassified"),
+                        "summary":  fields.get("summary",""),
+                        "date":     fields["date"],
+                    })
+                    print(f"Updated thread: {customer} | {ro_raw} → {fields.get('stage')}")
+                else:
+                    # new RO
+                    ref = db.collection("emails").add(fields)
+                    print(f"New RO saved: {customer} | {ro_raw} | {ref[1].id}")
+            else:
+                # no RO extracted — save as new
+                ref = db.collection("emails").add(fields)
+                print(f"Saved (no RO): {customer} | {fields.get('stage')}")
 
         M.logout()
         print("Done")
