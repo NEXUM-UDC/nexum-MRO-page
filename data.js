@@ -19,5 +19,26 @@ var MRO_DATA = [
       }
     ],
     "docs": []
+  },
+  {
+    "customer": "Emirates Engineering",
+    "rfq": null,
+    "ro": "RO-020202",
+    "pn": "V2500-A5",
+    "sn": "112233445",
+    "stage": "Part shipped",
+    "summary": "Repaired part V2500-A5 has been shipped via FedEx and is expected to arrive Thursday or Friday.",
+    "date": "Sun, 28 Jun 2026 15:08:35 -0500",
+    "from": "Avitej Akula <avitej.akula@gmail.com>",
+    "body": "Example MRO Team,\r\n\r\nJust a heads up, we dropped the part in the mail yesterday via FedEx\r\npriority. Tracking number is 7489 2031 9584. Should be with you\r\nThursday or Friday.\r\n\r\nPart: V2500-A5\r\nS/N: 112233445\r\nOur reference: RO-020202, PO 778899\r\n\r\nLet us know when it arrives and you've had a chance to look it over.\r\n\r\n- Tony\r\nEmirates Engineering\r\n",
+    "messages": [
+      {
+        "dir": "inbound",
+        "from": "Avitej Akula <avitej.akula@gmail.com>",
+        "time": "15:08",
+        "body": "Example MRO Team,\r\n\r\nJust a heads up, we dropped the part in the mail yesterday via FedEx\r\npriority. Tracking number is 7489 2031 9584. Should be with you\r\nThursday or Friday.\r\n\r\nPart: V2500-A5\r\nS/N: 112233445\r\nOur reference: RO-020202, PO 778899\r\n\r\nLet us know when it arrives and you've had a chance to look it over.\r\n\r\n- Tony\r\nEmirates Engineering\r\n"
+      }
+    ],
+    "docs": []
   }
 ];
