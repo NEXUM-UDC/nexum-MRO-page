@@ -399,7 +399,12 @@ function openRO(e) {
   var dl = document.getElementById("docsList");
   if (e.docs && e.docs.length) {
     dl.innerHTML = e.docs.map(function(d) {
-      return '<div class="doc-row"><div class="doc-name">' + d.name + '</div><div class="doc-tag">' + d.tag + '</div></div>';
+      return '<div class="doc-row">' +
+        '<div class="doc-name">📄 ' + d.name + '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center">' +
+        '<div class="doc-tag">' + d.tag + '</div>' +
+        '<div class="doc-tag" style="border-color:var(--muted);color:var(--muted);cursor:default">VIEW</div>' +
+        '</div></div>';
     }).join("");
   } else {
     dl.innerHTML = '<div class="empty" style="padding:16px 0">No documents attached</div>';
