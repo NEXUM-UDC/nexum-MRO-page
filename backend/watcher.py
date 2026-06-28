@@ -46,47 +46,53 @@ BODY: {body}"""
 
 
 def main():
-    # load secrets from environment
-    EMAIL       = os.environ["MRO_EMAIL"]
-    PASSWORD    = os.environ["MRO_APP_PASSWORD"]
-    ANT_KEY     = os.environ["ANTHROPIC_KEY"]
-    SA_JSON     = json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT"])
+    import traceback
+    try:
+        EMAIL    = os.environ["MRO_EMAIL"]
+        PASSWORD = os.environ["MRO_APP_PASSWORD"]
+        ANT_KEY  = os.environ["ANTHROPIC_KEY"]
+        SA_RAW   = os.environ["FIREBASE_SERVICE_ACCOUNT"]
 
-    # connect to Firestore
-    cred = credentials.Certificate(SA_JSON)
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
+        print(f"Service account JSON length: {len(SA_RAW)}")
+        SA_JSON = json.loads(SA_RAW)
+        print(f"Project ID: {SA_JSON.get('project_id')}")
 
-    # connect to Gmail
-    M = imaplib.IMAP4_SSL("imap.gmail.com", 993)
-    M.login(EMAIL, PASSWORD)
-    M.select("INBOX")
+        cred = credentials.Certificate(SA_JSON)
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
+        print("Firestore connected")
 
-    typ, data = M.search(None, "UNSEEN")
-    email_ids = data[0].split()
-    print(f"Found {len(email_ids)} new emails")
+        M = imaplib.IMAP4_SSL("imap.gmail.com", 993)
+        M.login(EMAIL, PASSWORD)
+        M.select("INBOX")
+        typ, data = M.search(None, "UNSEEN")
+        email_ids = data[0].split()
+        print(f"Found {len(email_ids)} new emails")
 
-    for num in email_ids:
-        typ, msg_data = M.fetch(num, "(RFC822)")
-        msg = email.message_from_bytes(msg_data[0][1])
+        for num in email_ids:
+            typ, msg_data = M.fetch(num, "(RFC822)")
+            msg = email.message_from_bytes(msg_data[0][1])
+            subject = decode_field(msg["Subject"])
+            body    = get_body(msg)
+            sender  = decode_field(msg["From"])
+            fields  = ai_extract(subject, body, sender, ANT_KEY)
+            fields["date"]     = msg["Date"] or ""
+            fields["from"]     = sender
+            fields["subject"]  = subject
+            fields["body"]     = body[:500]
+            fields["messages"] = [{"dir":"inbound","from":sender,"time":msg["Date"] or "","body":body[:500]}]
+            fields["docs"]     = []
+            print(f"Writing to Firestore: {fields.get('customer')} | {fields.get('stage')}")
+            ref = db.collection("emails").add(fields)
+            print(f"Saved with ID: {ref[1].id}")
 
-        subject = decode_field(msg["Subject"])
-        body    = get_body(msg)
-        sender  = decode_field(msg["From"])
+        M.logout()
+        print("Done")
 
-        fields = ai_extract(subject, body, sender, ANT_KEY)
-        fields["date"]     = msg["Date"] or ""
-        fields["from"]     = sender
-        fields["subject"]  = subject
-        fields["body"]     = body[:500]
-        fields["messages"] = [{"dir":"inbound","from":sender,"time":msg["Date"] or "","body":body[:500]}]
-        fields["docs"]     = []
-
-        db.collection("emails").add(fields)
-        print(f"Saved: {fields.get('customer')} | {fields.get('stage')}")
-
-    M.logout()
-    print("Done")
+    except Exception as e:
+        print(f"ERROR: {e}")
+        traceback.print_exc()
+        raise
 
 
 if __name__ == "__main__":
