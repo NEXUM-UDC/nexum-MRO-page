@@ -480,11 +480,13 @@
   <span id="toastMsg">New email received</span>
 </div>
 
+<script>var MRO_DATA = null;</script>
+<script src="data.js"></script>
 <script>
 // ══════════════════════════════════════════
-// DATA — seeded from your parsed_emails test results
+// DATA — loads from data.js (real emails) or falls back to demo
 // ══════════════════════════════════════════
-const parsedEmails = [
+const DEMO_DATA = [
   {
     customer: "Korean Air",
     rfq: "123457", ro: "RO-121212", pn: "CFM56-7B", sn: "876543210",
@@ -555,6 +557,8 @@ const parsedEmails = [
     docs: [{ name:"Quotation-RO030303-Delta.pdf", tag:"ISSUED" }, { name:"Teardown Report.pdf", tag:"INTERNAL" }]
   }
 ];
+
+const parsedEmails = (MRO_DATA && MRO_DATA.length) ? [...MRO_DATA] : [...DEMO_DATA];
 
 // ══════════════════════════════════════════
 // STATE
