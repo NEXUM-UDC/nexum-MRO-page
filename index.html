@@ -423,6 +423,7 @@ function saveStage() {
   if (idx !== -1) parsedEmails[idx].stage = newStage;
   showToast("Stage updated to " + newStage);
   renderCustomers();
+  renderStages();
 }
 
 function saveNotes() {
