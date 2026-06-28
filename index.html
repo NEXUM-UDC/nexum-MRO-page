@@ -5,381 +5,95 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nexum — MRO Portal</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:        #0A0F1E;
-    --surface:   #111827;
-    --surface2:  #1A2236;
-    --border:    #1E2D45;
-    --accent:    #00D4FF;
-    --accent2:   #0099BB;
-    --text:      #E8EDF5;
-    --muted:     #6B7A99;
-    --success:   #00E5A0;
-    --warning:   #FFB800;
-    --danger:    #FF4D6A;
-    --mono:      'JetBrains Mono', monospace;
-    --sans:      'Inter', sans-serif;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── HEADER ── */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    height: 56px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    position: sticky; top: 0; z-index: 100;
-  }
-  .logo {
-    font-family: var(--mono);
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-  }
-  .logo span { color: var(--muted); font-size: 12px; margin-left: 10px; letter-spacing: 0.12em; }
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--muted);
-    font-family: var(--mono);
-  }
-  .breadcrumb .crumb { color: var(--text); cursor: pointer; }
-  .breadcrumb .crumb:hover { color: var(--accent); }
-  .breadcrumb .sep { color: var(--border); }
-  .live-badge {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; font-family: var(--mono); color: var(--success);
-    letter-spacing: 0.1em;
-  }
-  .live-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--success);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  /* ── SCREENS ── */
-  .screen { display: none; padding: 32px; max-width: 1100px; margin: 0 auto; }
-  .screen.active { display: block; }
-
-  /* ── PAGE TITLE ── */
-  .page-title {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--accent);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .page-heading {
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 24px;
-  }
-
-  /* ── SEARCH ── */
-  .search-wrap {
-    position: relative;
-    margin-bottom: 28px;
-    max-width: 420px;
-  }
-  .search-wrap input {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 10px 14px 10px 38px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-wrap input:focus { border-color: var(--accent); }
-  .search-wrap input::placeholder { color: var(--muted); }
-  .search-icon {
-    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-    color: var(--muted); font-size: 14px; pointer-events: none;
-  }
-
-  /* ── CUSTOMER GRID ── */
-  .customer-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  .customer-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 20px;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .customer-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0;
-    width: 3px; height: 100%;
-    background: var(--accent);
-    transform: scaleY(0);
-    transform-origin: bottom;
-    transition: transform 0.2s;
-  }
-  .customer-card:hover { border-color: var(--accent); background: var(--surface2); }
-  .customer-card:hover::before { transform: scaleY(1); }
-  .customer-card.new-ping { animation: ping 0.6s ease; }
-  @keyframes ping {
-    0%   { border-color: var(--accent); box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
-    100% { border-color: var(--border); box-shadow: 0 0 0 12px rgba(0,212,255,0); }
-  }
-  .customer-name { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
-  .customer-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-  .customer-count {
-    margin-top: 14px;
-    display: flex; gap: 12px;
-  }
-  .count-pill {
-    font-family: var(--mono); font-size: 11px;
-    padding: 3px 8px;
-    border: 1px solid var(--border);
-    color: var(--muted);
-  }
-  .count-pill.has-items { border-color: var(--accent); color: var(--accent); }
-
-  /* ── STAGE GRID (screen 2) ── */
-  .stage-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 14px;
-    margin-bottom: 32px;
-  }
-  .stage-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 18px 20px;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .stage-card:hover { border-color: var(--accent); background: var(--surface2); }
-  .stage-label {
-    font-size: 11px; font-family: var(--mono);
-    color: var(--muted); letter-spacing: 0.15em;
-    text-transform: uppercase; margin-bottom: 8px;
-  }
-  .stage-name { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
-  .stage-badge {
-    font-family: var(--mono); font-size: 12px;
-    color: var(--accent); letter-spacing: 0.05em;
-  }
-
-  /* updates card */
-  .updates-card {
-    background: var(--surface);
-    border: 1px solid var(--success);
-    padding: 18px 20px;
-    cursor: pointer;
-    transition: background 0.2s;
-    display: flex; align-items: center; gap: 14px;
-  }
-  .updates-card:hover { background: var(--surface2); }
-  .updates-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--success); flex-shrink: 0;
-    animation: pulse 2s infinite;
-  }
-  .updates-text { font-size: 14px; font-weight: 500; }
-  .updates-sub { font-size: 12px; color: var(--muted); margin-top: 3px; font-family: var(--mono); }
-
-  /* ── RO LIST (screen 3) ── */
-  .ro-list { display: flex; flex-direction: column; gap: 10px; }
-  .ro-row {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 16px 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    align-items: center;
-    gap: 16px;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .ro-row:hover { border-color: var(--accent); background: var(--surface2); }
-  .ro-number { font-family: var(--mono); font-size: 14px; color: var(--accent); }
-  .ro-pn { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-  .ro-date { font-size: 12px; color: var(--muted); font-family: var(--mono); }
-  .ro-status {
-    font-size: 11px; font-family: var(--mono); letter-spacing: 0.1em;
-    padding: 4px 10px; border: 1px solid;
-    text-transform: uppercase;
-  }
-  .status-open   { color: var(--accent);   border-color: var(--accent); }
-  .status-action { color: var(--warning);  border-color: var(--warning); }
-  .status-done   { color: var(--success);  border-color: var(--success); }
-
-  /* ── TABLE HEADER ── */
-  .table-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    gap: 16px;
-    padding: 8px 20px;
-    font-size: 10px; font-family: var(--mono);
-    color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  /* ── MODAL ── */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(10,15,30,0.85);
-    z-index: 200;
-    align-items: center; justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    width: 680px; max-width: 95vw;
-    max-height: 85vh;
-    overflow-y: auto;
-    position: relative;
-  }
-  .modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: flex-start;
-  }
-  .modal-ro { font-family: var(--mono); font-size: 18px; color: var(--accent); }
-  .modal-customer { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
-  .modal-close {
-    background: none; border: 1px solid var(--border);
-    color: var(--muted); cursor: pointer; padding: 6px 10px; font-size: 14px;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .modal-close:hover { border-color: var(--danger); color: var(--danger); }
-
-  .modal-body { padding: 24px; }
-
-  .info-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 16px; margin-bottom: 24px;
-  }
-  .info-field label {
-    font-size: 10px; font-family: var(--mono);
-    color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;
-    display: block; margin-bottom: 4px;
-  }
-  .info-field .val {
-    font-family: var(--mono); font-size: 14px; color: var(--text);
-  }
-
-  .section-label {
-    font-size: 10px; font-family: var(--mono);
-    color: var(--muted); letter-spacing: 0.15em;
-    text-transform: uppercase; margin-bottom: 12px;
-    padding-bottom: 8px; border-bottom: 1px solid var(--border);
-  }
-
-  /* thread */
-  .thread { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .message {
-    padding: 12px 14px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-  }
-  .message.inbound { border-left: 3px solid var(--accent); }
-  .message.outbound { border-left: 3px solid var(--success); }
-  .msg-meta {
-    font-size: 11px; font-family: var(--mono); color: var(--muted);
-    margin-bottom: 6px; display: flex; justify-content: space-between;
-  }
-  .msg-from { color: var(--text); }
-  .msg-body { font-size: 13px; line-height: 1.6; }
-
-  /* compose */
-  .compose { margin-top: 4px; }
-  .compose textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono); font-size: 13px;
-    padding: 12px 14px;
-    resize: vertical; min-height: 80px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .compose textarea:focus { border-color: var(--accent); }
-  .compose-actions {
-    display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;
-  }
-  .btn {
-    padding: 9px 18px;
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em;
-    cursor: pointer; border: 1px solid; transition: background 0.2s, color 0.2s;
-  }
-  .btn-primary {
-    background: var(--accent); border-color: var(--accent);
-    color: var(--bg);
-  }
-  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
-  .btn-ghost {
-    background: transparent; border-color: var(--border); color: var(--muted);
-  }
-  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
-
-  /* docs */
-  .docs-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
-  .doc-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px;
-    background: var(--surface2); border: 1px solid var(--border);
-  }
-  .doc-name { font-family: var(--mono); font-size: 12px; }
-  .doc-tag {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
-    padding: 2px 8px; border: 1px solid var(--border); color: var(--muted);
-  }
-
-  /* toast */
-  .toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--surface); border: 1px solid var(--accent);
-    color: var(--text); font-family: var(--mono); font-size: 12px;
-    padding: 12px 18px; z-index: 999;
-    display: flex; align-items: center; gap: 10px;
-    transform: translateY(80px); opacity: 0;
-    transition: transform 0.3s, opacity 0.3s;
-  }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-
-  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-
-  /* empty state */
-  .empty {
-    padding: 48px 0; text-align: center;
-    font-family: var(--mono); font-size: 13px; color: var(--muted);
-  }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0F1E;--surface:#111827;--surface2:#1A2236;--border:#1E2D45;
+  --accent:#00D4FF;--accent2:#0099BB;--text:#E8EDF5;--muted:#6B7A99;
+  --success:#00E5A0;--warning:#FFB800;--danger:#FF4D6A;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+header{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
+.logo{font-family:var(--mono);font-size:18px;font-weight:500;letter-spacing:.08em;color:var(--accent)}
+.logo span{color:var(--muted);font-size:12px;margin-left:10px;letter-spacing:.12em}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-family:var(--mono)}
+.breadcrumb .crumb{color:var(--text);cursor:pointer}.breadcrumb .crumb:hover{color:var(--accent)}
+.breadcrumb .sep{color:var(--border)}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);color:var(--success);letter-spacing:.1em}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.screen{display:none;padding:32px;max-width:1100px;margin:0 auto}.screen.active{display:block}
+.page-title{font-size:11px;font-family:var(--mono);color:var(--accent);letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
+.page-heading{font-size:26px;font-weight:600;color:var(--text);margin-bottom:24px}
+.search-wrap{position:relative;margin-bottom:28px;max-width:420px}
+.search-wrap input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 14px 10px 38px;outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--accent)}.search-wrap input::placeholder{color:var(--muted)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+.customer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.customer-card{background:var(--surface);border:1px solid var(--border);padding:20px;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden}
+.customer-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);transform:scaleY(0);transform-origin:bottom;transition:transform .2s}
+.customer-card:hover{border-color:var(--accent);background:var(--surface2)}.customer-card:hover::before{transform:scaleY(1)}
+.customer-card.new-ping{animation:ping .6s ease}
+@keyframes ping{0%{border-color:var(--accent);box-shadow:0 0 0 0 rgba(0,212,255,.4)}100%{border-color:var(--border);box-shadow:0 0 0 12px rgba(0,212,255,0)}}
+.customer-name{font-size:15px;font-weight:500;margin-bottom:6px}
+.customer-meta{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.customer-count{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap}
+.count-pill{font-family:var(--mono);font-size:11px;padding:3px 8px;border:1px solid var(--border);color:var(--muted)}
+.count-pill.has-items{border-color:var(--accent);color:var(--accent)}
+.stage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:32px}
+.stage-card{background:var(--surface);border:1px solid var(--border);padding:18px 20px;cursor:pointer;transition:border-color .2s,background .2s}
+.stage-card:hover{border-color:var(--accent);background:var(--surface2)}
+.stage-label{font-size:11px;font-family:var(--mono);color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
+.stage-name{font-size:14px;font-weight:500;margin-bottom:10px}
+.stage-badge{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.05em}
+.updates-card{background:var(--surface);border:1px solid var(--success);padding:18px 20px;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.updates-card:hover{background:var(--surface2)}
+.updates-dot{width:10px;height:10px;border-radius:50%;background:var(--success);flex-shrink:0;animation:pulse 2s infinite}
+.updates-text{font-size:14px;font-weight:500}.updates-sub{font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.ro-list{display:flex;flex-direction:column;gap:10px}
+.ro-row{background:var(--surface);border:1px solid var(--border);padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 1fr auto;align-items:center;gap:16px;cursor:pointer;transition:border-color .2s,background .2s}
+.ro-row:hover{border-color:var(--accent);background:var(--surface2)}
+.ro-number{font-family:var(--mono);font-size:14px;color:var(--accent)}
+.ro-pn{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.ro-date{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.ro-status{font-size:11px;font-family:var(--mono);letter-spacing:.1em;padding:4px 10px;border:1px solid;text-transform:uppercase}
+.status-open{color:var(--accent);border-color:var(--accent)}.status-action{color:var(--warning);border-color:var(--warning)}.status-done{color:var(--success);border-color:var(--success)}
+.table-header{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:16px;padding:8px 20px;font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.85);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);width:680px;max-width:95vw;max-height:85vh;overflow-y:auto;position:relative}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start}
+.modal-ro{font-family:var(--mono);font-size:18px;color:var(--accent)}
+.modal-customer{font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:6px 10px;font-size:14px;transition:border-color .2s,color .2s}
+.modal-close:hover{border-color:var(--danger);color:var(--danger)}
+.modal-body{padding:24px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.info-field label{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:.15em;text-transform:uppercase;display:block;margin-bottom:4px}
+.info-field .val{font-family:var(--mono);font-size:14px;color:var(--text)}
+.section-label{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.thread{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.message{padding:12px 14px;border:1px solid var(--border);background:var(--surface2)}
+.message.inbound{border-left:3px solid var(--accent)}.message.outbound{border-left:3px solid var(--success)}
+.msg-meta{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.msg-from{color:var(--text)}.msg-body{font-size:13px;line-height:1.6;white-space:pre-wrap}
+.compose{margin-top:4px}
+.compose textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:12px 14px;resize:vertical;min-height:80px;outline:none;transition:border-color .2s}
+.compose textarea:focus{border-color:var(--accent)}
+.compose-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
+.btn{padding:9px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;cursor:pointer;border:1px solid;transition:background .2s,color .2s}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--bg)}.btn-primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--muted)}.btn-ghost:hover{border-color:var(--text);color:var(--text)}
+.docs-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.doc-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border)}
+.doc-name{font-family:var(--mono);font-size:12px}
+.doc-tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;padding:2px 8px;border:1px solid var(--border);color:var(--muted)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--accent);color:var(--text);font-family:var(--mono);font-size:12px;padding:12px 18px;z-index:999;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:transform .3s,opacity .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.empty{padding:48px 0;text-align:center;font-family:var(--mono);font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -392,60 +106,38 @@
   <div class="live-badge"><div class="live-dot"></div>LIVE</div>
 </header>
 
-<!-- ══════════════════════════════════════════
-     SCREEN 1 — CUSTOMERS
-══════════════════════════════════════════ -->
 <div class="screen active" id="screen1">
   <div class="page-title">MRO INBOX</div>
   <div class="page-heading">Customers</div>
-
   <div class="search-wrap">
     <span class="search-icon">⌕</span>
     <input type="text" id="customerSearch" placeholder="Search customer..." oninput="filterCustomers()">
   </div>
-
   <div class="customer-grid" id="customerGrid"></div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     SCREEN 2 — LIFECYCLE STAGES
-══════════════════════════════════════════ -->
 <div class="screen" id="screen2">
   <div class="page-title">REPAIR LIFECYCLE</div>
   <div class="page-heading" id="screen2Heading">Customer</div>
-
-  <div style="margin-bottom:20px">
-    <div class="updates-card" onclick="openUpdates()">
-      <div class="updates-dot"></div>
-      <div>
-        <div class="updates-text">Immediate Updates</div>
-        <div class="updates-sub" id="updatesSubtext">0 new messages</div>
-      </div>
+  <div class="updates-card" onclick="openUpdates()">
+    <div class="updates-dot"></div>
+    <div>
+      <div class="updates-text">Immediate Updates</div>
+      <div class="updates-sub" id="updatesSubtext">0 new messages</div>
     </div>
   </div>
-
   <div class="stage-grid" id="stageGrid"></div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     SCREEN 3 — RO LIST
-══════════════════════════════════════════ -->
 <div class="screen" id="screen3">
   <div class="page-title">REPAIR ORDERS</div>
   <div class="page-heading" id="screen3Heading">Stage</div>
-
   <div class="table-header">
-    <span>Repair Order</span>
-    <span>Part Number</span>
-    <span>Date</span>
-    <span>Status</span>
+    <span>Repair Order</span><span>Part Number</span><span>Date</span><span>Status</span>
   </div>
   <div class="ro-list" id="roList"></div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MODAL — RO DETAIL
-══════════════════════════════════════════ -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modal">
     <div class="modal-header">
@@ -474,14 +166,248 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast">
   <div class="toast-dot"></div>
   <span id="toastMsg">New email received</span>
 </div>
 
-<script>var MRO_DATA = null;</script>
-<script src="data.js"></script>
+<script>
+// ── STATE ─────────────────────────────────────────────────
+// Seed with real emails from data.js (inline here so no scope issues)
+const parsedEmails = [
+  {
+    customer:"Delta TechOps",rfq:"123456",ro:"RO-010101",pn:"CFM56-7B",sn:"987654321",
+    stage:"RFQ/capability request",
+    summary:"Customer requests repair capability check and quote for CFM56-7B engine part.",
+    date:"Sun, 28 Jun 2026 15:06:03 -0500",
+    from:"Elliott Choi <elliottchoi09alt@gmail.com>",
+    body:"Dear Example MRO,\n\nPlease check the repair capabilities for this part and provide a quote.\n\nPart Number: CFM56-7B\nSerial Number: 987654321\nRepair Order: RO-010101\nRFQ Number: 123456\n\nBest regards,\nDelta TechOps",
+    messages:[{dir:"inbound",from:"Elliott Choi <elliottchoi09alt@gmail.com>",time:"15:06",body:"Dear Example MRO,\n\nPlease check the repair capabilities for this part and provide a quote.\n\nPart Number: CFM56-7B\nSerial Number: 987654321\nRepair Order: RO-010101\nRFQ Number: 123456\n\nBest regards,\nDelta TechOps"}],
+    docs:[]
+  },
+  {
+    customer:"Emirates Engineering",rfq:null,ro:"RO-020202",pn:"V2500-A5",sn:"112233445",
+    stage:"Part shipped",
+    summary:"Part V2500-A5 shipped via FedEx, expected Thursday or Friday.",
+    date:"Sun, 28 Jun 2026 15:08:35 -0500",
+    from:"Avitej Akula <avitej.akula@gmail.com>",
+    body:"Example MRO Team,\n\nJust a heads up, we dropped the part in the mail yesterday via FedEx priority. Tracking number is 7489 2031 9584.\n\nPart: V2500-A5\nS/N: 112233445\nOur reference: RO-020202, PO 778899\n\n- Tony\nEmirates Engineering",
+    messages:[{dir:"inbound",from:"Avitej Akula <avitej.akula@gmail.com>",time:"15:08",body:"Example MRO Team,\n\nJust a heads up, we dropped the part in the mail yesterday via FedEx priority. Tracking number is 7489 2031 9584.\n\nPart: V2500-A5\nS/N: 112233445\nOur reference: RO-020202, PO 778899\n\n- Tony\nEmirates Engineering"}],
+    docs:[]
+  }
+];
+
+let currentCustomer = null;
+let currentStage    = null;
+let currentRO       = null;
+
+const STAGES = [
+  {key:"RFQ/capability request", label:"01 — RFQ",      name:"Request for Quote",   desc:"Capability checks & initial quotes"},
+  {key:"Part shipped",           label:"02 — SHIPPED",  name:"Part Shipped",        desc:"Inbound tracking & receiving"},
+  {key:"Quote issued",           label:"03 — QUOTE",    name:"Quote Issued",        desc:"Firm quotes pending approval"},
+  {key:"Quote approval",         label:"04 — APPROVAL", name:"Quote Approval",      desc:"Customer approvals & denials"},
+  {key:"Repair complete",        label:"05 — COMPLETE", name:"Repair Complete",     desc:"8130-3 / Form 1 & return shipment"},
+];
+
+// ── UTILITIES ─────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3500);
+}
+
+function goScreen(n) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen" + n).classList.add("active");
+  updateBreadcrumb(n);
+  if (n === 1) renderCustomers();
+}
+
+function updateBreadcrumb(n) {
+  const bc = document.getElementById("breadcrumb");
+  if (n === 1) {
+    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span>`;
+  } else if (n === 2) {
+    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span><span class="sep">/</span><span class="crumb">${currentCustomer}</span>`;
+  } else {
+    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span><span class="sep">/</span><span class="crumb" onclick="goScreen(2)">${currentCustomer}</span><span class="sep">/</span><span class="crumb">${currentStage}</span>`;
+  }
+}
+
+// ── SCREEN 1 — CUSTOMERS ──────────────────────────────────
+function getCustomers() {
+  const map = {};
+  parsedEmails.forEach(e => {
+    const name = e.customer || "Unknown";
+    if (!map[name]) map[name] = {name, emails:[]};
+    map[name].emails.push(e);
+  });
+  return Object.values(map);
+}
+
+function renderCustomers(filter="") {
+  const grid = document.getElementById("customerGrid");
+  const customers = getCustomers().filter(c =>
+    c.name.toLowerCase().includes(filter.toLowerCase())
+  );
+  if (!customers.length) {
+    grid.innerHTML = `<div class="empty">No customers found</div>`;
+    return;
+  }
+  grid.innerHTML = customers.map(c => {
+    const stageCounts = {};
+    c.emails.forEach(e => {
+      const s = e.stage || "Unclassified";
+      stageCounts[s] = (stageCounts[s]||0) + 1;
+    });
+    const pills = Object.entries(stageCounts)
+      .map(([s,n]) => `<span class="count-pill has-items">${n} ${s.split("/")[0].trim().toUpperCase()}</span>`)
+      .join("");
+    const safeId = c.name.replace(/\s/g,"-").replace(/[^a-zA-Z0-9\-]/g,"");
+    return `
+      <div class="customer-card" id="card-${safeId}" onclick="selectCustomer('${c.name.replace(/'/g,"\\'")}')">
+        <div class="customer-name">${c.name}</div>
+        <div class="customer-meta">${c.emails.length} repair order${c.emails.length!==1?"s":""}</div>
+        <div class="customer-count">${pills}</div>
+      </div>`;
+  }).join("");
+}
+
+function filterCustomers() {
+  renderCustomers(document.getElementById("customerSearch").value);
+}
+
+function selectCustomer(name) {
+  currentCustomer = name;
+  renderStages();
+  goScreen(2);
+}
+
+// ── SCREEN 2 — STAGES ─────────────────────────────────────
+function renderStages() {
+  document.getElementById("screen2Heading").textContent = currentCustomer;
+  const emails = parsedEmails.filter(e => e.customer === currentCustomer);
+  const newCount = emails.filter(e => {
+    const last = e.messages && e.messages[e.messages.length-1];
+    return last && last.dir === "inbound";
+  }).length;
+  document.getElementById("updatesSubtext").textContent = `${newCount} awaiting response`;
+  const grid = document.getElementById("stageGrid");
+  grid.innerHTML = STAGES.map(s => {
+    const count = emails.filter(e => e.stage === s.key).length;
+    return `
+      <div class="stage-card" onclick="selectStage('${s.key}','${s.name}')">
+        <div class="stage-label">${s.label}</div>
+        <div class="stage-name">${s.name}</div>
+        <div class="stage-badge">${count > 0 ? count+" active" : "— none"}</div>
+      </div>`;
+  }).join("");
+}
+
+function openUpdates() {
+  const emails = parsedEmails.filter(e => e.customer === currentCustomer);
+  if (emails.length) openRO(emails[0]);
+}
+
+// ── SCREEN 3 — RO LIST ────────────────────────────────────
+function selectStage(stageKey, stageName) {
+  currentStage = stageName;
+  const emails = parsedEmails.filter(e => e.customer === currentCustomer && e.stage === stageKey);
+  document.getElementById("screen3Heading").textContent = stageName;
+  const list = document.getElementById("roList");
+  if (!emails.length) {
+    list.innerHTML = `<div class="empty">No repair orders at this stage</div>`;
+  } else {
+    list.innerHTML = emails.map((e,i) => {
+      const lastMsg = e.messages && e.messages[e.messages.length-1];
+      const needsReply = lastMsg && lastMsg.dir === "inbound";
+      const statusClass = needsReply ? "status-action" : "status-open";
+      const statusText  = needsReply ? "REPLY NEEDED" : "OPEN";
+      const dateStr = e.date ? e.date.split(" ").slice(1,4).join(" ") : "—";
+      return `
+        <div class="ro-row" onclick="openRO(parsedEmails.filter(x=>x.customer==='${currentCustomer}'&&x.stage==='${stageKey}')[${i}])">
+          <div class="ro-number">${e.ro||"—"}</div>
+          <div class="ro-pn">PN: ${e.pn||"—"} &nbsp;|&nbsp; SN: ${e.sn||"—"}</div>
+          <div class="ro-date">${dateStr}</div>
+          <div class="ro-status ${statusClass}">${statusText}</div>
+        </div>`;
+    }).join("");
+  }
+  goScreen(3);
+}
+
+// ── MODAL ─────────────────────────────────────────────────
+function openRO(e) {
+  if (!e) return;
+  currentRO = e;
+  document.getElementById("modalRO").textContent = e.ro || "—";
+  document.getElementById("modalCustomer").textContent = `${e.customer} · ${e.stage}`;
+  document.getElementById("infoGrid").innerHTML = [
+    ["Part Number", e.pn||"—"],["Serial Number", e.sn||"—"],
+    ["RFQ", e.rfq||"—"],["Date Received", e.date ? e.date.split(" ").slice(1,4).join(" ") : "—"],
+    ["Stage", e.stage||"—"],["Customer Contact", e.from||"—"],
+  ].map(([k,v]) => `<div class="info-field"><label>${k}</label><div class="val">${v}</div></div>`).join("");
+  const dl = document.getElementById("docsList");
+  if (e.docs && e.docs.length) {
+    dl.innerHTML = e.docs.map(d => `<div class="doc-row"><div class="doc-name">📄 ${d.name}</div><div class="doc-tag">${d.tag}</div></div>`).join("");
+  } else {
+    dl.innerHTML = `<div class="empty" style="padding:16px 0">No documents attached</div>`;
+  }
+  document.getElementById("thread").innerHTML = (e.messages||[]).map(m => `
+    <div class="message ${m.dir}">
+      <div class="msg-meta">
+        <span class="msg-from">${m.dir==="inbound" ? m.from : "You (Example MRO)"}</span>
+        <span>${m.time||""}</span>
+      </div>
+      <div class="msg-body">${m.body||""}</div>
+    </div>`).join("");
+  document.getElementById("composeBox").value = "";
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("modalOverlay")) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById("modalOverlay").classList.remove("open");
+}
+
+function sendMessage() {
+  const box = document.getElementById("composeBox");
+  const text = box.value.trim();
+  if (!text) return;
+  const thread = document.getElementById("thread");
+  const now = new Date();
+  const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}`;
+  thread.innerHTML += `
+    <div class="message outbound">
+      <div class="msg-meta"><span class="msg-from">You (Example MRO)</span><span>${time}</span></div>
+      <div class="msg-body">${text}</div>
+    </div>`;
+  box.value = "";
+  thread.scrollTop = thread.scrollHeight;
+  showToast(`Message sent to ${currentRO?.customer}`);
+}
+
+function draftWithAI() {
+  const e = currentRO;
+  if (!e) return;
+  const drafts = {
+    "RFQ/capability request": `Dear ${e.customer} team,\n\nThank you for your inquiry. We confirm capability on PN ${e.pn||"the referenced part"}. We will proceed with evaluation and provide a firm quotation following teardown and inspection.\n\nBest regards,\nExample MRO`,
+    "Part shipped": `Dear ${e.customer} team,\n\nWe confirm receipt of PN ${e.pn||"the part"} SN ${e.sn||"—"} for RO ${e.ro}. Incoming inspection is underway.\n\nBest regards,\nExample MRO`,
+    "Quote issued": `Dear ${e.customer} team,\n\nPlease find our firm quotation attached for RO ${e.ro}. Valid 30 days. Please reply with written approval to proceed.\n\nBest regards,\nExample MRO`,
+    "Quote approval": `Dear ${e.customer} team,\n\nThank you for the approval. We will commence work on RO ${e.ro} immediately.\n\nBest regards,\nExample MRO`,
+    "Repair complete": `Dear ${e.customer} team,\n\nRO ${e.ro} is complete. FAA Form 8130-3 enclosed. Please confirm return shipping address.\n\nBest regards,\nExample MRO`,
+  };
+  document.getElementById("composeBox").value = drafts[e.stage] || `Dear ${e.customer} team,\n\nUpdate regarding RO ${e.ro}.\n\nBest regards,\nExample MRO`;
+}
+
+// ── INIT ──────────────────────────────────────────────────
+renderCustomers();
+</script>
+
+<!-- Firebase — live updates from Firestore -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot }
@@ -503,17 +429,18 @@ onSnapshot(collection(db, "emails"), (snapshot) => {
   snapshot.docChanges().forEach(change => {
     if (change.type === "added") {
       const e = change.doc.data();
-      if (!e.messages) e.messages = [{dir:"inbound", from:e.from||"", time:e.date||"", body:e.body||""}];
+      if (!e.customer) return;
+      if (!e.messages) e.messages = [{dir:"inbound",from:e.from||"",time:e.date||"",body:e.body||""}];
       if (!e.docs) e.docs = [];
-
       const exists = parsedEmails.some(x => x.ro === e.ro && x.date === e.date && x.customer === e.customer);
       if (!exists) {
         parsedEmails.unshift(e);
-        showToast(`New email from ${e.customer} — ${e.stage}`);
+        window.showToast(`New email from ${e.customer} — ${e.stage}`);
         if (document.getElementById("screen1").classList.contains("active")) {
-          renderCustomers();
+          window.renderCustomers();
           setTimeout(() => {
-            const card = document.getElementById("card-" + (e.customer||"").replace(/\s/g,"-"));
+            const safeId = (e.customer||"").replace(/\s/g,"-").replace(/[^a-zA-Z0-9\-]/g,"");
+            const card = document.getElementById("card-" + safeId);
             if (card) card.classList.add("new-ping");
           }, 100);
         }
@@ -521,8 +448,6 @@ onSnapshot(collection(db, "emails"), (snapshot) => {
     }
   });
 });
-
-renderCustomers();
 </script>
 </body>
 </html>
