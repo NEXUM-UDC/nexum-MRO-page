@@ -76,17 +76,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 .info-field label{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:.15em;text-transform:uppercase;display:block;margin-bottom:4px}
 .info-field .val{font-family:var(--mono);font-size:14px;color:var(--text)}
-.info-field input,.info-field select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 10px;outline:none;transition:border-color .2s}
-.info-field input:focus,.info-field select:focus{border-color:var(--accent)}
-.info-field select option{background:var(--surface2)}
-.edit-actions{display:flex;gap:10px;margin-bottom:20px}
 .section-label{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .thread{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
 .message{padding:12px 14px;border:1px solid var(--border);background:var(--surface2)}
 .message.inbound{border-left:3px solid var(--accent)}.message.outbound{border-left:3px solid var(--success)}
 .msg-meta{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
 .msg-from{color:var(--text)}.msg-body{font-size:13px;line-height:1.6;white-space:pre-wrap}
-.compose{margin-top:4px}
 .compose textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:12px 14px;resize:vertical;min-height:80px;outline:none;transition:border-color .2s}
 .compose textarea:focus{border-color:var(--accent)}
 .compose-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
@@ -111,16 +106,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">NEXUM <span>MRO PORTAL</span></div>
-  <div class="breadcrumb" id="breadcrumb">
-    <span class="crumb" onclick="goScreen(1)">Customers</span>
-  </div>
+  <div class="breadcrumb" id="breadcrumb"><span class="crumb" onclick="goScreen(1)">Customers</span></div>
   <div class="live-badge"><div class="live-dot"></div>LIVE</div>
 </header>
 
-<!-- SCREEN 1 — CUSTOMERS -->
 <div class="screen active" id="screen1">
   <div class="page-title">MRO INBOX</div>
   <div class="page-heading">Customers</div>
@@ -131,7 +122,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
   <div class="customer-grid" id="customerGrid"></div>
 </div>
 
-<!-- SCREEN 2 — STAGES -->
 <div class="screen" id="screen2">
   <div class="page-title">REPAIR LIFECYCLE</div>
   <div class="page-heading" id="screen2Heading">Customer</div>
@@ -145,7 +135,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
   <div class="stage-grid" id="stageGrid"></div>
 </div>
 
-<!-- SCREEN 3 — RO LIST -->
 <div class="screen" id="screen3">
   <div class="page-title">REPAIR ORDERS</div>
   <div class="page-heading" id="screen3Heading">Stage</div>
@@ -155,7 +144,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
   <div class="ro-list" id="roList"></div>
 </div>
 
-<!-- MODAL — RO DETAIL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modal">
     <div class="modal-header">
@@ -166,11 +154,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
       <button class="modal-close" onclick="closeModalDirect()">✕ CLOSE</button>
     </div>
     <div class="modal-body">
-
-      <!-- editable info grid -->
       <div class="info-grid" id="infoGrid"></div>
-
-      <!-- manual stage reassign -->
       <div style="margin-bottom:16px">
         <div class="section-label">Reassign Stage</div>
         <div style="display:flex;gap:10px;align-items:center">
@@ -185,41 +169,33 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
           <button class="btn btn-warn btn-sm" onclick="saveStage()">Save Stage</button>
         </div>
       </div>
-
       <hr class="divider">
       <div class="section-label">Documents</div>
       <div class="docs-list" id="docsList"></div>
       <hr class="divider">
-
-      <!-- notes section -->
       <div class="section-label">Notes</div>
       <textarea class="notes-area" id="notesArea" placeholder="Add internal notes about this repair order..."></textarea>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <span class="notes-saved" id="notesSaved">✓ Saved</span>
+        <span class="notes-saved" id="notesSaved">Saved</span>
         <button class="btn btn-ghost btn-sm" onclick="saveNotes()">Save Notes</button>
       </div>
-
       <hr class="divider">
       <div class="section-label">Message Thread</div>
       <div class="thread" id="thread"></div>
       <div class="compose">
         <textarea id="composeBox" placeholder="Type a message to send to this customer..."></textarea>
         <div class="compose-actions">
-          <button class="btn btn-ghost" onclick="draftWithAI()">⚡ AI Draft</button>
-          <button class="btn btn-primary" onclick="sendMessage()">Send Update →</button>
+          <button class="btn btn-ghost" onclick="draftWithAI()">AI Draft</button>
+          <button class="btn btn-primary" onclick="sendMessage()">Send Update</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast">
-  <div class="toast-dot"></div>
-  <span id="toastMsg">New email received</span>
-</div>
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">New email received</span></div>
 
 <script>
-// ── STATE ─────────────────────────────────────────────────
 const parsedEmails = [
   {
     customer:"Delta TechOps",rfq:"123456",ro:"RO-010101",pn:"CFM56-7B",sn:"987654321",
@@ -243,90 +219,87 @@ const parsedEmails = [
   }
 ];
 
-// local notes store — keyed by ro+customer
 const localNotes = {};
-
 let currentCustomer = null;
-let currentStage    = null;
-let currentRO       = null;
-let firestoreDB     = null;  // set by Firebase module
+let currentStage = null;
+let currentRO = null;
 
 const STAGES = [
-  {key:"RFQ/capability request", label:"01 — RFQ",       name:"Request for Quote",  desc:"Capability checks & initial quotes"},
-  {key:"Part shipped",           label:"02 — SHIPPED",   name:"Part Shipped",       desc:"Inbound tracking & receiving"},
-  {key:"Quote issued",           label:"03 — QUOTE",     name:"Quote Issued",       desc:"Firm quotes pending approval"},
-  {key:"Quote approval",         label:"04 — APPROVAL",  name:"Quote Approval",     desc:"Customer approvals & denials"},
-  {key:"Repair complete",        label:"05 — COMPLETE",  name:"Repair Complete",    desc:"8130-3 / Form 1 & return shipment"},
-  {key:"Unclassified",           label:"⚠ UNCLASSIFIED", name:"Unclassified",       desc:"Needs manual review & sorting"},
+  {key:"RFQ/capability request",label:"01 - RFQ",name:"Request for Quote"},
+  {key:"Part shipped",label:"02 - SHIPPED",name:"Part Shipped"},
+  {key:"Quote issued",label:"03 - QUOTE",name:"Quote Issued"},
+  {key:"Quote approval",label:"04 - APPROVAL",name:"Quote Approval"},
+  {key:"Repair complete",label:"05 - COMPLETE",name:"Repair Complete"},
+  {key:"Unclassified",label:"UNCLASSIFIED",name:"Unclassified"},
 ];
 
-// ── UTILITIES ─────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById("toast");
   document.getElementById("toastMsg").textContent = msg;
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 3500);
+  setTimeout(function() { t.classList.remove("show"); }, 3500);
 }
 
 function goScreen(n) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach(function(s) { s.classList.remove("active"); });
   document.getElementById("screen" + n).classList.add("active");
   updateBreadcrumb(n);
   if (n === 1) renderCustomers();
 }
 
 function updateBreadcrumb(n) {
-  const bc = document.getElementById("breadcrumb");
+  var bc = document.getElementById("breadcrumb");
   if (n === 1) {
-    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span>`;
+    bc.innerHTML = '<span class="crumb" onclick="goScreen(1)">Customers</span>';
   } else if (n === 2) {
-    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span><span class="sep">/</span><span class="crumb">${currentCustomer}</span>`;
+    bc.innerHTML = '<span class="crumb" onclick="goScreen(1)">Customers</span><span class="sep">/</span><span class="crumb">' + currentCustomer + '</span>';
   } else {
-    bc.innerHTML = `<span class="crumb" onclick="goScreen(1)">Customers</span><span class="sep">/</span><span class="crumb" onclick="goScreen(2)">${currentCustomer}</span><span class="sep">/</span><span class="crumb">${currentStage}</span>`;
+    bc.innerHTML = '<span class="crumb" onclick="goScreen(1)">Customers</span><span class="sep">/</span><span class="crumb" onclick="goScreen(2)">' + currentCustomer + '</span><span class="sep">/</span><span class="crumb">' + currentStage + '</span>';
   }
 }
 
-function noteKey(e) { return `${e.customer}__${e.ro}`; }
+function noteKey(e) { return e.customer + "__" + e.ro; }
 
-// ── SCREEN 1 — CUSTOMERS ──────────────────────────────────
 function getCustomers() {
-  const map = {};
-  parsedEmails.forEach(e => {
-    const name = e.customer || "Unknown";
-    if (!map[name]) map[name] = {name, emails:[]};
+  var map = {};
+  parsedEmails.forEach(function(e) {
+    var name = e.customer || "Unknown";
+    if (!map[name]) map[name] = {name: name, emails: []};
     map[name].emails.push(e);
   });
   return Object.values(map);
 }
 
-function renderCustomers(filter="") {
-  const grid = document.getElementById("customerGrid");
-  const customers = getCustomers().filter(c =>
-    c.name.toLowerCase().includes(filter.toLowerCase())
-  );
+function renderCustomers(filter) {
+  filter = filter || "";
+  var grid = document.getElementById("customerGrid");
+  var customers = getCustomers().filter(function(c) {
+    return c.name.toLowerCase().includes(filter.toLowerCase());
+  });
   if (!customers.length) {
-    grid.innerHTML = `<div class="empty">No customers found</div>`;
+    grid.innerHTML = '<div class="empty">No customers found</div>';
     return;
   }
-  grid.innerHTML = customers.map(c => {
-    const stageCounts = {};
-    c.emails.forEach(e => {
-      const s = e.stage || "Unclassified";
-      stageCounts[s] = (stageCounts[s]||0) + 1;
+  grid.innerHTML = customers.map(function(c) {
+    var stageCounts = {};
+    c.emails.forEach(function(e) {
+      var s = e.stage || "Unclassified";
+      stageCounts[s] = (stageCounts[s] || 0) + 1;
     });
-    const pills = Object.entries(stageCounts).map(([s,n]) => {
-      const isUnclass = s === "Unclassified";
-      const cls = isUnclass ? "count-pill unclassified" : "count-pill has-items";
-      const label = isUnclass ? "⚠ UNCLASSIFIED" : `${n} ${s.split("/")[0].trim().toUpperCase()}`;
-      return `<span class="${cls}">${label}</span>`;
+    var pills = Object.entries(stageCounts).map(function(entry) {
+      var s = entry[0]; var n = entry[1];
+      var isUnclass = s === "Unclassified";
+      var cls = isUnclass ? "count-pill unclassified" : "count-pill has-items";
+      var label = isUnclass ? "UNCLASSIFIED" : (n + " " + s.split("/")[0].trim().toUpperCase());
+      return '<span class="' + cls + '">' + label + '</span>';
     }).join("");
-    const safeId = c.name.replace(/\s/g,"-").replace(/[^a-zA-Z0-9\-]/g,"");
-    return `
-      <div class="customer-card" id="card-${safeId}" onclick="selectCustomer('${c.name.replace(/'/g,"\\'")}')">
-        <div class="customer-name">${c.name}</div>
-        <div class="customer-meta">${c.emails.length} repair order${c.emails.length!==1?"s":""}</div>
-        <div class="customer-count">${pills}</div>
-      </div>`;
+    var safeId = c.name.replace(/\s/g, "-").replace(/[^a-zA-Z0-9\-]/g, "");
+    var safeName = c.name.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    return '<div class="customer-card" id="card-' + safeId + '" onclick="selectCustomer(\'' + safeName + '\')">' +
+      '<div class="customer-name">' + c.name + '</div>' +
+      '<div class="customer-meta">' + c.emails.length + ' repair order' + (c.emails.length !== 1 ? "s" : "") + '</div>' +
+      '<div class="customer-count">' + pills + '</div>' +
+      '</div>';
   }).join("");
 }
 
@@ -340,106 +313,94 @@ function selectCustomer(name) {
   goScreen(2);
 }
 
-// ── SCREEN 2 — STAGES ─────────────────────────────────────
 function renderStages() {
   document.getElementById("screen2Heading").textContent = currentCustomer;
-  const emails = parsedEmails.filter(e => e.customer === currentCustomer);
-  const newCount = emails.filter(e => {
-    const last = e.messages && e.messages[e.messages.length-1];
+  var emails = parsedEmails.filter(function(e) { return e.customer === currentCustomer; });
+  var newCount = emails.filter(function(e) {
+    var last = e.messages && e.messages[e.messages.length - 1];
     return last && last.dir === "inbound";
   }).length;
-  document.getElementById("updatesSubtext").textContent = `${newCount} awaiting response`;
-  const grid = document.getElementById("stageGrid");
-  grid.innerHTML = STAGES.map(s => {
-    const count = emails.filter(e => e.stage === s.key).length;
-    const isUnclass = s.key === "Unclassified";
-    const cardClass = isUnclass ? "stage-card unclassified-card" : "stage-card";
-    const badgeClass = isUnclass && count > 0 ? "stage-badge warn" : "stage-badge";
-    return `
-      <div class="${cardClass}" onclick="selectStage('${s.key}','${s.name}')">
-        <div class="stage-label">${s.label}</div>
-        <div class="stage-name">${s.name}</div>
-        <div class="${badgeClass}">${count > 0 ? count+" active" : "— none"}</div>
-      </div>`;
+  document.getElementById("updatesSubtext").textContent = newCount + " awaiting response";
+  var grid = document.getElementById("stageGrid");
+  grid.innerHTML = STAGES.map(function(s) {
+    var count = emails.filter(function(e) { return e.stage === s.key; }).length;
+    var isUnclass = s.key === "Unclassified";
+    var cardClass = isUnclass ? "stage-card unclassified-card" : "stage-card";
+    var badgeClass = (isUnclass && count > 0) ? "stage-badge warn" : "stage-badge";
+    var safeName = s.name.replace(/'/g, "\\'");
+    var safeKey = s.key.replace(/'/g, "\\'");
+    return '<div class="' + cardClass + '" onclick="selectStage(\'' + safeKey + '\',\'' + safeName + '\')">' +
+      '<div class="stage-label">' + s.label + '</div>' +
+      '<div class="stage-name">' + s.name + '</div>' +
+      '<div class="' + badgeClass + '">' + (count > 0 ? count + " active" : "— none") + '</div>' +
+      '</div>';
   }).join("");
 }
 
 function openUpdates() {
-  const emails = parsedEmails.filter(e => e.customer === currentCustomer);
+  var emails = parsedEmails.filter(function(e) { return e.customer === currentCustomer; });
   if (emails.length) openRO(emails[0]);
 }
 
-// ── SCREEN 3 — RO LIST ────────────────────────────────────
 function selectStage(stageKey, stageName) {
   currentStage = stageName;
-  const emails = parsedEmails.filter(e => e.customer === currentCustomer && e.stage === stageKey);
+  var emails = parsedEmails.filter(function(e) {
+    return e.customer === currentCustomer && e.stage === stageKey;
+  });
+  window._stageEmails = emails;
   document.getElementById("screen3Heading").textContent = stageName;
-  const list = document.getElementById("roList");
+  var list = document.getElementById("roList");
   if (!emails.length) {
-    list.innerHTML = `<div class="empty">No repair orders at this stage</div>`;
+    list.innerHTML = '<div class="empty">No repair orders at this stage</div>';
   } else {
-    window._stageEmails = emails;
-    list.innerHTML = emails.map((e,i) => {
-      const lastMsg = e.messages && e.messages[e.messages.length-1];
-      const needsReply = lastMsg && lastMsg.dir === "inbound";
-      const isUnclass = e.stage === "Unclassified";
-      const statusClass = isUnclass ? "status-action" : needsReply ? "status-action" : "status-open";
-      const statusText  = isUnclass ? "REVIEW NEEDED" : needsReply ? "REPLY NEEDED" : "OPEN";
-      const dateStr = e.date ? e.date.split(" ").slice(1,4).join(" ") : "—";
-      return `
-        <div class="ro-row" onclick="openRO(window._stageEmails[${i}])"><div class="ro-number">${e.ro||"—"}</div>
-          <div class="ro-pn">PN: ${e.pn||"—"} &nbsp;|&nbsp; SN: ${e.sn||"—"}</div>
-          <div class="ro-date">${dateStr}</div>
-          <div class="ro-status ${statusClass}">${statusText}</div>
-        </div>`;
+    list.innerHTML = emails.map(function(e, i) {
+      var lastMsg = e.messages && e.messages[e.messages.length - 1];
+      var needsReply = lastMsg && lastMsg.dir === "inbound";
+      var isUnclass = e.stage === "Unclassified";
+      var statusClass = (isUnclass || needsReply) ? "status-action" : "status-open";
+      var statusText = isUnclass ? "REVIEW NEEDED" : (needsReply ? "REPLY NEEDED" : "OPEN");
+      var dateStr = e.date ? e.date.split(" ").slice(1, 4).join(" ") : "—";
+      return '<div class="ro-row" onclick="openRO(window._stageEmails[' + i + '])">' +
+        '<div class="ro-number">' + (e.ro || "—") + '</div>' +
+        '<div class="ro-pn">PN: ' + (e.pn || "—") + ' | SN: ' + (e.sn || "—") + '</div>' +
+        '<div class="ro-date">' + dateStr + '</div>' +
+        '<div class="ro-status ' + statusClass + '">' + statusText + '</div>' +
+        '</div>';
     }).join("");
   }
   goScreen(3);
 }
 
-// ── MODAL ─────────────────────────────────────────────────
 function openRO(e) {
   if (!e) return;
   currentRO = e;
   document.getElementById("modalRO").textContent = e.ro || "—";
-  document.getElementById("modalCustomer").textContent = `${e.customer} · ${e.stage}`;
-
-  // info grid — editable fields
-  document.getElementById("infoGrid").innerHTML = `
-    <div class="info-field"><label>Part Number</label><div class="val">${e.pn||"—"}</div></div>
-    <div class="info-field"><label>Serial Number</label><div class="val">${e.sn||"—"}</div></div>
-    <div class="info-field"><label>RFQ</label><div class="val">${e.rfq||"—"}</div></div>
-    <div class="info-field"><label>Date Received</label><div class="val">${e.date ? e.date.split(" ").slice(1,4).join(" ") : "—"}</div></div>
-    <div class="info-field"><label>Stage</label><div class="val">${e.stage||"—"}</div></div>
-    <div class="info-field"><label>Customer Contact</label><div class="val" style="font-size:12px;word-break:break-all">${e.from||"—"}</div></div>`;
-
-  // set stage dropdown to current value
-  const sel = document.getElementById("stageSelect");
-  sel.value = e.stage || "Unclassified";
-
-  // docs
-  const dl = document.getElementById("docsList");
+  document.getElementById("modalCustomer").textContent = e.customer + " · " + e.stage;
+  document.getElementById("infoGrid").innerHTML =
+    '<div class="info-field"><label>Part Number</label><div class="val">' + (e.pn || "—") + '</div></div>' +
+    '<div class="info-field"><label>Serial Number</label><div class="val">' + (e.sn || "—") + '</div></div>' +
+    '<div class="info-field"><label>RFQ</label><div class="val">' + (e.rfq || "—") + '</div></div>' +
+    '<div class="info-field"><label>Date Received</label><div class="val">' + (e.date ? e.date.split(" ").slice(1, 4).join(" ") : "—") + '</div></div>' +
+    '<div class="info-field"><label>Stage</label><div class="val">' + (e.stage || "—") + '</div></div>' +
+    '<div class="info-field"><label>Customer Contact</label><div class="val" style="font-size:12px;word-break:break-all">' + (e.from || "—") + '</div></div>';
+  document.getElementById("stageSelect").value = e.stage || "Unclassified";
+  var dl = document.getElementById("docsList");
   if (e.docs && e.docs.length) {
-    dl.innerHTML = e.docs.map(d => `<div class="doc-row"><div class="doc-name">📄 ${d.name}</div><div class="doc-tag">${d.tag}</div></div>`).join("");
+    dl.innerHTML = e.docs.map(function(d) {
+      return '<div class="doc-row"><div class="doc-name">doc ' + d.name + '</div><div class="doc-tag">' + d.tag + '</div></div>';
+    }).join("");
   } else {
-    dl.innerHTML = `<div class="empty" style="padding:16px 0">No documents attached</div>`;
+    dl.innerHTML = '<div class="empty" style="padding:16px 0">No documents attached</div>';
   }
-
-  // notes — load from local store
-  const key = noteKey(e);
+  var key = noteKey(e);
   document.getElementById("notesArea").value = localNotes[key] || e.notes || "";
   document.getElementById("notesSaved").classList.remove("show");
-
-  // thread
-  document.getElementById("thread").innerHTML = (e.messages||[]).map(m => `
-    <div class="message ${m.dir}">
-      <div class="msg-meta">
-        <span class="msg-from">${m.dir==="inbound" ? m.from : "You (Example MRO)"}</span>
-        <span>${m.time||""}</span>
-      </div>
-      <div class="msg-body">${m.body||""}</div>
-    </div>`).join("");
-
+  document.getElementById("thread").innerHTML = (e.messages || []).map(function(m) {
+    return '<div class="message ' + m.dir + '">' +
+      '<div class="msg-meta"><span class="msg-from">' + (m.dir === "inbound" ? m.from : "You (Example MRO)") + '</span><span>' + (m.time || "") + '</span></div>' +
+      '<div class="msg-body">' + (m.body || "") + '</div>' +
+      '</div>';
+  }).join("");
   document.getElementById("composeBox").value = "";
   document.getElementById("modalOverlay").classList.add("open");
 }
@@ -447,101 +408,67 @@ function openRO(e) {
 function closeModal(e) {
   if (e.target === document.getElementById("modalOverlay")) closeModalDirect();
 }
+
 function closeModalDirect() {
   document.getElementById("modalOverlay").classList.remove("open");
 }
 
-// ── STAGE REASSIGN ────────────────────────────────────────
 function saveStage() {
   if (!currentRO) return;
-  const newStage = document.getElementById("stageSelect").value;
-  const oldStage = currentRO.stage;
-  if (newStage === oldStage) { showToast("Stage unchanged"); return; }
-
+  var newStage = document.getElementById("stageSelect").value;
+  if (newStage === currentRO.stage) { showToast("Stage unchanged"); return; }
   currentRO.stage = newStage;
-  document.getElementById("modalCustomer").textContent = `${currentRO.customer} · ${newStage}`;
-  document.getElementById("infoGrid").querySelectorAll(".info-field")[4].querySelector(".val").textContent = newStage;
-
-  // update in parsedEmails array
-  const idx = parsedEmails.findIndex(x => x.ro === currentRO.ro && x.customer === currentRO.customer);
+  document.getElementById("modalCustomer").textContent = currentRO.customer + " · " + newStage;
+  var idx = parsedEmails.findIndex(function(x) { return x.ro === currentRO.ro && x.customer === currentRO.customer; });
   if (idx !== -1) parsedEmails[idx].stage = newStage;
-
-  // write to Firestore if connected
-  if (firestoreDB && currentRO._docId) {
-    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({doc, updateDoc}) => {
-      updateDoc(doc(firestoreDB, "emails", currentRO._docId), {stage: newStage})
-        .then(() => showToast(`Stage updated → ${newStage}`))
-        .catch(() => showToast(`Stage updated locally`));
-    });
-  } else {
-    showToast(`Stage updated → ${newStage}`);
-  }
+  showToast("Stage updated to " + newStage);
   renderCustomers();
 }
 
-// ── NOTES ─────────────────────────────────────────────────
 function saveNotes() {
   if (!currentRO) return;
-  const text = document.getElementById("notesArea").value;
-  const key = noteKey(currentRO);
-  localNotes[key] = text;
-
-  // write to Firestore if connected
-  if (firestoreDB && currentRO._docId) {
-    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({doc, updateDoc}) => {
-      updateDoc(doc(firestoreDB, "emails", currentRO._docId), {notes: text})
-        .catch(() => {});
-    });
-  }
-
-  const saved = document.getElementById("notesSaved");
+  var text = document.getElementById("notesArea").value;
+  localNotes[noteKey(currentRO)] = text;
+  var saved = document.getElementById("notesSaved");
   saved.classList.add("show");
-  setTimeout(() => saved.classList.remove("show"), 2000);
+  setTimeout(function() { saved.classList.remove("show"); }, 2000);
 }
 
-// ── COMPOSE ───────────────────────────────────────────────
 function sendMessage() {
-  const box = document.getElementById("composeBox");
-  const text = box.value.trim();
+  var box = document.getElementById("composeBox");
+  var text = box.value.trim();
   if (!text) return;
-  const thread = document.getElementById("thread");
-  const now = new Date();
-  const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}`;
-  thread.innerHTML += `
-    <div class="message outbound">
-      <div class="msg-meta"><span class="msg-from">You (Example MRO)</span><span>${time}</span></div>
-      <div class="msg-body">${text}</div>
-    </div>`;
+  var thread = document.getElementById("thread");
+  var now = new Date();
+  var time = now.getHours() + ":" + String(now.getMinutes()).padStart(2, "0");
+  thread.innerHTML += '<div class="message outbound"><div class="msg-meta"><span class="msg-from">You (Example MRO)</span><span>' + time + '</span></div><div class="msg-body">' + text + '</div></div>';
   box.value = "";
   thread.scrollTop = thread.scrollHeight;
-  showToast(`Message sent to ${currentRO?.customer}`);
+  showToast("Message sent to " + (currentRO ? currentRO.customer : "customer"));
 }
 
 function draftWithAI() {
-  const e = currentRO;
+  var e = currentRO;
   if (!e) return;
-  const drafts = {
-    "RFQ/capability request": `Dear ${e.customer} team,\n\nThank you for your inquiry. We confirm capability on PN ${e.pn||"the referenced part"}. We will proceed with evaluation and provide a firm quotation following teardown and inspection.\n\nBest regards,\nExample MRO`,
-    "Part shipped": `Dear ${e.customer} team,\n\nWe confirm receipt of PN ${e.pn||"the part"} SN ${e.sn||"—"} for RO ${e.ro}. Incoming inspection is underway.\n\nBest regards,\nExample MRO`,
-    "Quote issued": `Dear ${e.customer} team,\n\nPlease find our firm quotation attached for RO ${e.ro}. Valid 30 days. Please reply with written approval to proceed.\n\nBest regards,\nExample MRO`,
-    "Quote approval": `Dear ${e.customer} team,\n\nThank you for the approval. We will commence work on RO ${e.ro} immediately.\n\nBest regards,\nExample MRO`,
-    "Repair complete": `Dear ${e.customer} team,\n\nRO ${e.ro} is complete. FAA Form 8130-3 enclosed. Please confirm return shipping address.\n\nBest regards,\nExample MRO`,
-    "Unclassified": `Dear ${e.customer} team,\n\nThank you for your message regarding ${e.pn ? "PN "+e.pn : "your part"}. Could you please provide more details so we can assist you correctly?\n\nBest regards,\nExample MRO`,
+  var drafts = {
+    "RFQ/capability request": "Dear " + e.customer + " team,\n\nThank you for your inquiry. We confirm capability on PN " + (e.pn || "the referenced part") + ". We will proceed with evaluation and provide a firm quotation following teardown and inspection.\n\nBest regards,\nExample MRO",
+    "Part shipped": "Dear " + e.customer + " team,\n\nWe confirm receipt of PN " + (e.pn || "the part") + " SN " + (e.sn || "—") + " for RO " + e.ro + ". Incoming inspection is underway.\n\nBest regards,\nExample MRO",
+    "Quote issued": "Dear " + e.customer + " team,\n\nPlease find our firm quotation attached for RO " + e.ro + ". Valid 30 days. Please reply with written approval to proceed.\n\nBest regards,\nExample MRO",
+    "Quote approval": "Dear " + e.customer + " team,\n\nThank you for the approval. We will commence work on RO " + e.ro + " immediately.\n\nBest regards,\nExample MRO",
+    "Repair complete": "Dear " + e.customer + " team,\n\nRO " + e.ro + " is complete. FAA Form 8130-3 enclosed. Please confirm return shipping address.\n\nBest regards,\nExample MRO",
+    "Unclassified": "Dear " + e.customer + " team,\n\nThank you for your message. Could you please provide more details so we can assist you correctly?\n\nBest regards,\nExample MRO"
   };
-  document.getElementById("composeBox").value = drafts[e.stage] || `Dear ${e.customer} team,\n\nUpdate regarding RO ${e.ro}.\n\nBest regards,\nExample MRO`;
+  document.getElementById("composeBox").value = drafts[e.stage] || ("Dear " + e.customer + " team,\n\nUpdate regarding RO " + e.ro + ".\n\nBest regards,\nExample MRO");
 }
 
-// ── INIT ──────────────────────────────────────────────────
 renderCustomers();
 </script>
 
-<!-- Firebase — live updates -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
+var firebaseConfig = {
   apiKey: "AIzaSyA9z1eM2TQyMGC-YSupaYksXb2bThE_ZTk",
   authDomain: "nexum-7533f.firebaseapp.com",
   projectId: "nexum-7533f",
@@ -550,28 +477,27 @@ const firebaseConfig = {
   appId: "1:754154560620:web:de57e08f3b004084d68c49"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-window.firestoreDB = db;
+var app = initializeApp(firebaseConfig);
+var db = getFirestore(app);
 
-onSnapshot(collection(db, "emails"), (snapshot) => {
-  snapshot.docChanges().forEach(change => {
-    const e = change.doc.data();
+onSnapshot(collection(db, "emails"), function(snapshot) {
+  snapshot.docChanges().forEach(function(change) {
+    var e = change.doc.data();
     e._docId = change.doc.id;
     if (!e.customer) return;
     if (!e.messages) e.messages = [{dir:"inbound",from:e.from||"",time:e.date||"",body:e.body||""}];
     if (!e.docs) e.docs = [];
 
     if (change.type === "added") {
-      const exists = parsedEmails.some(x => x.ro === e.ro && x.date === e.date && x.customer === e.customer);
+      var exists = parsedEmails.some(function(x) { return x.ro === e.ro && x.date === e.date && x.customer === e.customer; });
       if (!exists) {
         parsedEmails.unshift(e);
-        window.showToast(`New email from ${e.customer} — ${e.stage}`);
+        showToast("New email from " + e.customer + " — " + e.stage);
         if (document.getElementById("screen1").classList.contains("active")) {
-          window.renderCustomers();
-          setTimeout(() => {
-            const safeId = (e.customer||"").replace(/\s/g,"-").replace(/[^a-zA-Z0-9\-]/g,"");
-            const card = document.getElementById("card-" + safeId);
+          renderCustomers();
+          setTimeout(function() {
+            var safeId = (e.customer || "").replace(/\s/g, "-").replace(/[^a-zA-Z0-9\-]/g, "");
+            var card = document.getElementById("card-" + safeId);
             if (card) card.classList.add("new-ping");
           }, 100);
         }
@@ -579,15 +505,15 @@ onSnapshot(collection(db, "emails"), (snapshot) => {
     }
 
     if (change.type === "modified") {
-      const idx = parsedEmails.findIndex(x => x.ro === e.ro && x.customer === e.customer);
+      var idx = parsedEmails.findIndex(function(x) { return x.ro === e.ro && x.customer === e.customer; });
       if (idx !== -1) {
         parsedEmails[idx] = e;
       } else {
         parsedEmails.unshift(e);
       }
-      window.showToast(`Update: ${e.customer} — ${e.stage}`);
+      showToast("Update: " + e.customer + " — " + e.stage);
       if (document.getElementById("screen1").classList.contains("active")) {
-        window.renderCustomers();
+        renderCustomers();
       }
     }
   });
