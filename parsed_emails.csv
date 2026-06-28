@@ -1,2 +1,17 @@
-customer,rfq,ro,pn,sn,stage,summary,date
-Delta TechOps,123456,RO-010101,CFM56-7B,987654321,RFQ/capability request,Request for repair capabilities check and quote on CFM56-7B engine module.,"Sun, 28 Jun 2026 14:49:21 -0500"
+customer,rfq,ro,pn,sn,stage,summary,date,from_addr,body_text
+Delta TechOps,123456,RO-010101,CFM56-7B,987654321,RFQ/capability request,Customer requests repair capability check and quote for CFM56-7B engine part.,"Sun, 28 Jun 2026 15:06:03 -0500",Elliott Choi <elliottchoi09alt@gmail.com>,"Dear Example MRO,
+
+Please check the repair capabilities for this part and provide a quote.
+
+Part Number: CFM56-7B
+
+Serial Number: 987654321
+
+Repair Order: RO-010101
+
+RFQ Number: 123456
+
+Best regards,
+
+Delta TechOps
+"
