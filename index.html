@@ -104,6 +104,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
 .divider{border:none;border-top:1px solid var(--border);margin:20px 0}
 .empty{padding:48px 0;text-align:center;font-family:var(--mono);font-size:13px;color:var(--muted)}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 <header>
@@ -196,7 +197,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">New email received</span></div>
 
 <script>
-const parsedEmails = [
+emailjs.init("rIaEyjo-9FlKybLt3");
+
+var parsedEmails = [
   {
     customer:"Delta TechOps",rfq:"123456",ro:"RO-010101",pn:"CFM56-7B",sn:"987654321",
     stage:"RFQ/capability request",
@@ -219,22 +222,30 @@ const parsedEmails = [
   }
 ];
 
-const localNotes = {};
-let currentCustomer = null;
-let currentStage = null;
-let currentRO = null;
+var localNotes = {};
+var currentCustomer = null;
+var currentStage = null;
+var currentRO = null;
 
-const STAGES = [
+var STAGES = [
   {key:"RFQ/capability request",label:"01 - RFQ",name:"Request for Quote"},
   {key:"Part shipped",label:"02 - SHIPPED",name:"Part Shipped"},
   {key:"Quote issued",label:"03 - QUOTE",name:"Quote Issued"},
   {key:"Quote approval",label:"04 - APPROVAL",name:"Quote Approval"},
   {key:"Repair complete",label:"05 - COMPLETE",name:"Repair Complete"},
-  {key:"Unclassified",label:"UNCLASSIFIED",name:"Unclassified"},
+  {key:"Unclassified",label:"UNCLASSIFIED",name:"Unclassified"}
 ];
 
+function extractEmail(fromField) {
+  if (!fromField) return "";
+  var match = fromField.match(/<([^>]+)>/);
+  if (match) return match[1].trim();
+  if (fromField.indexOf("@") !== -1) return fromField.trim();
+  return "";
+}
+
 function showToast(msg) {
-  const t = document.getElementById("toast");
+  var t = document.getElementById("toast");
   document.getElementById("toastMsg").textContent = msg;
   t.classList.add("show");
   setTimeout(function() { t.classList.remove("show"); }, 3500);
@@ -374,6 +385,7 @@ function selectStage(stageKey, stageName) {
 function openRO(e) {
   if (!e) return;
   currentRO = e;
+  var emailAddr = extractEmail(e.from);
   document.getElementById("modalRO").textContent = e.ro || "—";
   document.getElementById("modalCustomer").textContent = e.customer + " · " + e.stage;
   document.getElementById("infoGrid").innerHTML =
@@ -382,12 +394,12 @@ function openRO(e) {
     '<div class="info-field"><label>RFQ</label><div class="val">' + (e.rfq || "—") + '</div></div>' +
     '<div class="info-field"><label>Date Received</label><div class="val">' + (e.date ? e.date.split(" ").slice(1, 4).join(" ") : "—") + '</div></div>' +
     '<div class="info-field"><label>Stage</label><div class="val">' + (e.stage || "—") + '</div></div>' +
-    '<div class="info-field"><label>Customer Contact</label><div class="val" style="font-size:12px;word-break:break-all">' + (e.from || "—") + '</div></div>';
+    '<div class="info-field"><label>Customer Contact</label><div class="val" style="font-size:12px;word-break:break-all">' + (e.from || "—") + (emailAddr ? '<br><span style="color:var(--accent);font-size:11px">' + emailAddr + '</span>' : '') + '</div></div>';
   document.getElementById("stageSelect").value = e.stage || "Unclassified";
   var dl = document.getElementById("docsList");
   if (e.docs && e.docs.length) {
     dl.innerHTML = e.docs.map(function(d) {
-      return '<div class="doc-row"><div class="doc-name">doc ' + d.name + '</div><div class="doc-tag">' + d.tag + '</div></div>';
+      return '<div class="doc-row"><div class="doc-name">' + d.name + '</div><div class="doc-tag">' + d.tag + '</div></div>';
     }).join("");
   } else {
     dl.innerHTML = '<div class="empty" style="padding:16px 0">No documents attached</div>';
@@ -429,7 +441,11 @@ function saveStage() {
 function saveNotes() {
   if (!currentRO) return;
   var text = document.getElementById("notesArea").value;
-  localNotes[noteKey(currentRO)] = text;
+  var key = noteKey(currentRO);
+  localNotes[key] = text;
+  var idx = parsedEmails.findIndex(function(x) { return x.ro === currentRO.ro && x.customer === currentRO.customer; });
+  if (idx !== -1) parsedEmails[idx].notes = text;
+  currentRO.notes = text;
   var saved = document.getElementById("notesSaved");
   saved.classList.add("show");
   setTimeout(function() { saved.classList.remove("show"); }, 2000);
@@ -438,14 +454,32 @@ function saveNotes() {
 function sendMessage() {
   var box = document.getElementById("composeBox");
   var text = box.value.trim();
-  if (!text) return;
-  var thread = document.getElementById("thread");
-  var now = new Date();
-  var time = now.getHours() + ":" + String(now.getMinutes()).padStart(2, "0");
-  thread.innerHTML += '<div class="message outbound"><div class="msg-meta"><span class="msg-from">You (Example MRO)</span><span>' + time + '</span></div><div class="msg-body">' + text + '</div></div>';
-  box.value = "";
-  thread.scrollTop = thread.scrollHeight;
-  showToast("Message sent to " + (currentRO ? currentRO.customer : "customer"));
+  if (!text || !currentRO) return;
+
+  var toEmail = extractEmail(currentRO.from);
+  if (!toEmail) {
+    showToast("No customer email found");
+    return;
+  }
+
+  var subject = "Re: " + (currentRO.ro || "Repair Order") + " — " + (currentRO.pn || "");
+
+  emailjs.send("service_hzlvhwr", "template_cymee67", {
+    to_email: toEmail,
+    subject: subject,
+    message: text
+  }).then(function() {
+    var thread = document.getElementById("thread");
+    var now = new Date();
+    var time = now.getHours() + ":" + String(now.getMinutes()).padStart(2, "0");
+    thread.innerHTML += '<div class="message outbound"><div class="msg-meta"><span class="msg-from">You (Example MRO)</span><span>' + time + '</span></div><div class="msg-body">' + text + '</div></div>';
+    box.value = "";
+    thread.scrollTop = thread.scrollHeight;
+    showToast("Email sent to " + toEmail);
+  }, function(err) {
+    showToast("Send failed — check console");
+    console.error("EmailJS error:", err);
+  });
 }
 
 function draftWithAI() {
