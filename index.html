@@ -378,6 +378,7 @@ function selectStage(stageKey, stageName) {
   if (!emails.length) {
     list.innerHTML = `<div class="empty">No repair orders at this stage</div>`;
   } else {
+    window._stageEmails = emails;
     list.innerHTML = emails.map((e,i) => {
       const lastMsg = e.messages && e.messages[e.messages.length-1];
       const needsReply = lastMsg && lastMsg.dir === "inbound";
@@ -386,8 +387,7 @@ function selectStage(stageKey, stageName) {
       const statusText  = isUnclass ? "REVIEW NEEDED" : needsReply ? "REPLY NEEDED" : "OPEN";
       const dateStr = e.date ? e.date.split(" ").slice(1,4).join(" ") : "—";
       return `
-        <div class="ro-row" onclick="openRO(parsedEmails.filter(x=>x.customer===${JSON.stringify(currentCustomer)}&&x.stage===${JSON.stringify(stageKey)})[${i}])">
-          <div class="ro-number">${e.ro||"—"}</div>
+        <div class="ro-row" onclick="openRO(window._stageEmails[${i}])"><div class="ro-number">${e.ro||"—"}</div>
           <div class="ro-pn">PN: ${e.pn||"—"} &nbsp;|&nbsp; SN: ${e.sn||"—"}</div>
           <div class="ro-date">${dateStr}</div>
           <div class="ro-status ${statusClass}">${statusText}</div>
