@@ -446,6 +446,23 @@ onSnapshot(collection(db, "emails"), (snapshot) => {
         }
       }
     }
+
+    if (change.type === "modified") {
+      const e = change.doc.data();
+      if (!e.customer) return;
+      if (!e.messages) e.messages = [];
+      if (!e.docs) e.docs = [];
+      const idx = parsedEmails.findIndex(x => x.ro === e.ro && x.customer === e.customer);
+      if (idx !== -1) {
+        parsedEmails[idx] = e;
+      } else {
+        parsedEmails.unshift(e);
+      }
+      window.showToast(`Update: ${e.customer} — ${e.stage}`);
+      if (document.getElementById("screen1").classList.contains("active")) {
+        window.renderCustomers();
+      }
+    }
   });
 });
 </script>
