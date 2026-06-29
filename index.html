@@ -14,7 +14,7 @@
   --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
-header{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
+header{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;border-bottom:1px solid var(--border);background:#000;position:sticky;top:0;z-index:100}
 .logo{font-family:var(--mono);font-size:18px;font-weight:500;letter-spacing:.08em;color:var(--accent)}
 .logo span{color:var(--muted);font-size:12px;margin-left:10px;letter-spacing:.12em}
 .breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-family:var(--mono)}
@@ -108,9 +108,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
 </head>
 <body>
 <header>
-  <div style="display:flex;align-items:center;gap:20px">
-    <a href="../nexum-main-page/index.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em;text-decoration:none;border:1px solid var(--border);padding:4px 10px;transition:color .2s,border-color .2s" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">← HOME</a>
-    <div class="logo">NEXUM <span>MRO PORTAL</span></div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <a href="../nexum-main-page/index.html" style="display:flex;align-items:center;opacity:.85;transition:opacity .2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.85'"><img src="NEXUM-LOGO.png" alt="Nexum" style="height:55px;width:auto;display:block"></a>
   </div>
   <div class="breadcrumb" id="breadcrumb"><span class="crumb" onclick="goScreen(1)">Customers</span></div>
   <div class="live-badge"><div class="live-dot"></div>LIVE</div>
