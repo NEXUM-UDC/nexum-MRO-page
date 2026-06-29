@@ -45,12 +45,22 @@ def normalize_ro(ro):
 
 def ai_extract(subject, body, sender, api_key):
     client = anthropic.Anthropic(api_key=api_key)
-    prompt = f"""Extract repair-order details from this aviation MRO email. Return ONLY a JSON object with keys: customer, rfq, ro, pn, sn, stage, summary.
-For stage pick: RFQ/capability request, Part shipped, Quote issued, Quote approval, Repair complete, or Unclassified.
+    prompt = f"""Extract repair-order details from this aviation MRO email. Return ONLY a JSON object with these exact keys: customer, rfq, ro, pn, sn, stage, summary, confidence.
+
+For "stage" pick exactly one: RFQ/capability request, Part shipped, Quote issued, Quote approval, Repair complete, or Unclassified.
+For "confidence" give an integer 0-100 representing how confident you are in the classification based on available information. Consider:
+- 90-100: clear aviation MRO email with part number, RO, and obvious stage
+- 70-89: aviation context clear but some details missing
+- 50-69: some aviation terms but ambiguous or missing key fields
+- 0-49: vague, no part numbers, no clear MRO context, or unrelated content
+
+If confidence is below 60, set stage to Unclassified regardless of other signals.
 If a field is missing use null.
+
 FROM: {sender}
 SUBJECT: {subject}
 BODY: {body}"""
+
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=400,
@@ -58,9 +68,14 @@ BODY: {body}"""
     )
     raw = msg.content[0].text.strip().replace("```json","").replace("```","").strip()
     try:
-        return json.loads(raw)
+        result = json.loads(raw)
+        confidence = result.get("confidence", 100)
+        if isinstance(confidence, int) and confidence < 60:
+            result["stage"] = "Unclassified"
+        result["confidence"] = confidence
+        return result
     except:
-        return {"stage":"Unclassified","customer":None,"ro":None,"pn":None,"sn":None,"rfq":None,"summary":None}
+        return {"stage":"Unclassified","customer":None,"ro":None,"pn":None,"sn":None,"rfq":None,"summary":None,"confidence":0}
 
 
 def main():
