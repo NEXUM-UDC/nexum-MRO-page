@@ -118,7 +118,7 @@ def main():
             ro_norm = normalize_ro(ro_raw)
             customer = fields.get("customer")
 
-            print(f"Attachments found: {fields['docs']}")
+            print(f"Attachments: {fields['docs']} | Confidence: {fields.get('confidence')}%")
 
             if ro_norm and customer:
                 existing = db.collection("emails")\
