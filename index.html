@@ -473,10 +473,12 @@ function sendMessage() {
 
   var subject = "Re: " + (currentRO.ro || "Repair Order") + " — " + (currentRO.pn || "");
 
-  emailjs.send("service_hzlvhwr", "template_cymee67", {
+emailjs.send("service_hzlvhwr", "template_cymee67", {
     to_email: toEmail,
     subject: subject,
-    message: text
+    message: text,
+    reply_to: "example.mro.email@gmail.com"
+})
   }).then(function() {
     var thread = document.getElementById("thread");
     var now = new Date();
@@ -494,17 +496,42 @@ function sendMessage() {
 function draftWithAI() {
   var e = currentRO;
   if (!e) return;
-  var drafts = {
-    "RFQ/capability request": "Dear " + e.customer + " team,\n\nThank you for your inquiry. We confirm capability on PN " + (e.pn || "the referenced part") + ". We will proceed with evaluation and provide a firm quotation following teardown and inspection.\n\nBest regards,\nExample MRO",
-    "Part shipped": "Dear " + e.customer + " team,\n\nWe confirm receipt of PN " + (e.pn || "the part") + " SN " + (e.sn || "—") + " for RO " + e.ro + ". Incoming inspection is underway.\n\nBest regards,\nExample MRO",
-    "Quote issued": "Dear " + e.customer + " team,\n\nPlease find our firm quotation attached for RO " + e.ro + ". Valid 30 days. Please reply with written approval to proceed.\n\nBest regards,\nExample MRO",
-    "Quote approval": "Dear " + e.customer + " team,\n\nThank you for the approval. We will commence work on RO " + e.ro + " immediately.\n\nBest regards,\nExample MRO",
-    "Repair complete": "Dear " + e.customer + " team,\n\nRO " + e.ro + " is complete. FAA Form 8130-3 enclosed. Please confirm return shipping address.\n\nBest regards,\nExample MRO",
-    "Unclassified": "Dear " + e.customer + " team,\n\nThank you for your message. Could you please provide more details so we can assist you correctly?\n\nBest regards,\nExample MRO"
-  };
-  document.getElementById("composeBox").value = drafts[e.stage] || ("Dear " + e.customer + " team,\n\nUpdate regarding RO " + e.ro + ".\n\nBest regards,\nExample MRO");
-}
 
+  var box = document.getElementById("composeBox");
+  box.value = "Drafting...";
+  box.disabled = true;
+
+  var threadText = (e.messages || []).map(function(m) {
+    return (m.dir === "inbound" ? "CUSTOMER: " : "YOU: ") + m.body;
+  }).join("\n\n---\n\n");
+
+  fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 400,
+      messages: [{
+        role: "user",
+        content: "You are an aviation MRO repair shop assistant drafting a professional email reply.\n\nRepair order context:\nCustomer: " + e.customer + "\nRO: " + (e.ro || "—") + "\nPN: " + (e.pn || "—") + "\nSN: " + (e.sn || "—") + "\nStage: " + (e.stage || "—") + "\n\nEmail thread so far:\n" + threadText + "\n\nDraft a professional, concise reply that addresses what the customer said. Sign off as Example MRO. Return only the email body text, no subject line."
+      }]
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    box.value = data.content[0].text.trim();
+    box.disabled = false;
+  }).catch(function() {
+    var fallbacks = {
+      "RFQ/capability request": "Dear " + e.customer + " team,\n\nThank you for your inquiry. We confirm capability on PN " + (e.pn || "the referenced part") + ". We will proceed with evaluation and provide a firm quotation following teardown and inspection.\n\nBest regards,\nExample MRO",
+      "Part shipped": "Dear " + e.customer + " team,\n\nWe confirm receipt of PN " + (e.pn || "the part") + " SN " + (e.sn || "—") + " for RO " + (e.ro || "—") + ". Incoming inspection is underway.\n\nBest regards,\nExample MRO",
+      "Quote issued": "Dear " + e.customer + " team,\n\nPlease find our firm quotation attached for RO " + (e.ro || "—") + ". Valid 30 days. Please reply with written approval to proceed.\n\nBest regards,\nExample MRO",
+      "Quote approval": "Dear " + e.customer + " team,\n\nThank you for the approval. We will commence work on RO " + (e.ro || "—") + " immediately.\n\nBest regards,\nExample MRO",
+      "Repair complete": "Dear " + e.customer + " team,\n\nRO " + (e.ro || "—") + " is complete. FAA Form 8130-3 enclosed. Please confirm return shipping address.\n\nBest regards,\nExample MRO",
+      "Unclassified": "Dear " + e.customer + " team,\n\nThank you for your message. Could you please provide more details so we can assist you correctly?\n\nBest regards,\nExample MRO"
+    };
+    box.value = fallbacks[e.stage] || ("Dear " + e.customer + " team,\n\nUpdate regarding RO " + e.ro + ".\n\nBest regards,\nExample MRO");
+    box.disabled = false;
+  });
+}
 renderCustomers();
 </script>
 
