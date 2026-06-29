@@ -350,7 +350,7 @@ function renderStages() {
 
 function openUpdates() {
   var emails = parsedEmails.filter(function(e) { return e.customer === currentCustomer; });
-  if (emails.length) openRO(emails[0]);
+  if (emails.length) (emails[0]);
 }
 
 function selectStage(stageKey, stageName) {
@@ -389,13 +389,17 @@ function openRO(e) {
   document.getElementById("modalRO").textContent = e.ro || "—";
   document.getElementById("modalCustomer").textContent = e.customer + " · " + e.stage;
   document.getElementById("infoGrid").innerHTML =
+var confidence = e.confidence !== undefined ? e.confidence : null;
+  var confColor = confidence === null ? "var(--muted)" : confidence >= 80 ? "var(--success)" : confidence >= 60 ? "var(--warning)" : "var(--danger)";
+  var confLabel = confidence === null ? "—" : confidence + "% " + (confidence >= 80 ? "HIGH" : confidence >= 60 ? "MEDIUM" : "LOW");
+  document.getElementById("infoGrid").innerHTML =
     '<div class="info-field"><label>Part Number</label><div class="val">' + (e.pn || "—") + '</div></div>' +
     '<div class="info-field"><label>Serial Number</label><div class="val">' + (e.sn || "—") + '</div></div>' +
     '<div class="info-field"><label>RFQ</label><div class="val">' + (e.rfq || "—") + '</div></div>' +
     '<div class="info-field"><label>Date Received</label><div class="val">' + (e.date ? e.date.split(" ").slice(1, 4).join(" ") : "—") + '</div></div>' +
     '<div class="info-field"><label>Stage</label><div class="val">' + (e.stage || "—") + '</div></div>' +
-    '<div class="info-field"><label>Customer Contact</label><div class="val" style="font-size:12px;word-break:break-all">' + (e.from || "—") + (emailAddr ? '<br><span style="color:var(--accent);font-size:11px">' + emailAddr + '</span>' : '') + '</div></div>';
-  document.getElementById("stageSelect").value = e.stage || "Unclassified";
+    '<div class="info-field"><label>AI Confidence</label><div class="val" style="color:' + confColor + ';font-weight:500">' + confLabel + '</div></div>' +
+    '<div class="info-field" style="grid-column:1/-1"><label>Customer Contact</label><div class="val" style="font-size:12px;word-break:break-all">' + (e.from || "—") + (emailAddr ? '<br><span style="color:var(--accent);font-size:11px">' + emailAddr + '</span>' : '') + '</div></div>';  document.getElementById("stageSelect").value = e.stage || "Unclassified";
   var dl = document.getElementById("docsList");
   if (e.docs && e.docs.length) {
     dl.innerHTML = e.docs.map(function(d) {
