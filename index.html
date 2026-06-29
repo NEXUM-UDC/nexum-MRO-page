@@ -152,7 +152,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
         <div class="modal-ro" id="modalRO">RO-000000</div>
         <div class="modal-customer" id="modalCustomer">—</div>
       </div>
-      <button class="modal-close" onclick="closeModalDirect()">✕ CLOSE</button>
+      <button class="modal-close" onclick="closeModalDirect()">X CLOSE</button>
     </div>
     <div class="modal-body">
       <div class="info-grid" id="infoGrid"></div>
@@ -202,21 +202,21 @@ emailjs.init("rIaEyjo-9FlKybLt3");
 var parsedEmails = [
   {
     customer:"Delta TechOps",rfq:"123456",ro:"RO-010101",pn:"CFM56-7B",sn:"987654321",
-    stage:"RFQ/capability request",
+    stage:"RFQ/capability request",confidence:95,
     summary:"Customer requests repair capability check and quote for CFM56-7B engine part.",
     date:"Sun, 28 Jun 2026 15:06:03 -0500",
     from:"Elliott Choi <elliottchoi09alt@gmail.com>",
-    body:"Dear Example MRO,\n\nPlease check the repair capabilities for this part and provide a quote.\n\nPart Number: CFM56-7B\nSerial Number: 987654321\nRepair Order: RO-010101\nRFQ Number: 123456\n\nBest regards,\nDelta TechOps",
+    body:"Dear Example MRO, please check repair capabilities for CFM56-7B SN 987654321 RO-010101 RFQ 123456.",
     messages:[{dir:"inbound",from:"Elliott Choi <elliottchoi09alt@gmail.com>",time:"15:06",body:"Dear Example MRO,\n\nPlease check the repair capabilities for this part and provide a quote.\n\nPart Number: CFM56-7B\nSerial Number: 987654321\nRepair Order: RO-010101\nRFQ Number: 123456\n\nBest regards,\nDelta TechOps"}],
     docs:[]
   },
   {
     customer:"Emirates Engineering",rfq:null,ro:"RO-020202",pn:"V2500-A5",sn:"112233445",
-    stage:"Part shipped",
+    stage:"Part shipped",confidence:88,
     summary:"Part V2500-A5 shipped via FedEx, expected Thursday or Friday.",
     date:"Sun, 28 Jun 2026 15:08:35 -0500",
     from:"Avitej Akula <avitej.akula@gmail.com>",
-    body:"Example MRO Team,\n\nJust a heads up, we dropped the part in the mail yesterday via FedEx priority. Tracking number is 7489 2031 9584.\n\nPart: V2500-A5\nS/N: 112233445\nOur reference: RO-020202, PO 778899\n\n- Tony\nEmirates Engineering",
+    body:"Part shipped via FedEx tracking 7489 2031 9584.",
     messages:[{dir:"inbound",from:"Avitej Akula <avitej.akula@gmail.com>",time:"15:08",body:"Example MRO Team,\n\nJust a heads up, we dropped the part in the mail yesterday via FedEx priority. Tracking number is 7489 2031 9584.\n\nPart: V2500-A5\nS/N: 112233445\nOur reference: RO-020202, PO 778899\n\n- Tony\nEmirates Engineering"}],
     docs:[]
   }
@@ -350,7 +350,7 @@ function renderStages() {
 
 function openUpdates() {
   var emails = parsedEmails.filter(function(e) { return e.customer === currentCustomer; });
-  if (emails.length) (emails[0]);
+  if (emails.length) openRO(emails[0]);
 }
 
 function selectStage(stageKey, stageName) {
@@ -386,12 +386,11 @@ function openRO(e) {
   if (!e) return;
   currentRO = e;
   var emailAddr = extractEmail(e.from);
-  document.getElementById("modalRO").textContent = e.ro || "—";
-  document.getElementById("modalCustomer").textContent = e.customer + " · " + e.stage;
-  document.getElementById("infoGrid").innerHTML =
-var confidence = e.confidence !== undefined ? e.confidence : null;
+  var confidence = (e.confidence !== undefined && e.confidence !== null) ? e.confidence : null;
   var confColor = confidence === null ? "var(--muted)" : confidence >= 80 ? "var(--success)" : confidence >= 60 ? "var(--warning)" : "var(--danger)";
   var confLabel = confidence === null ? "—" : confidence + "% " + (confidence >= 80 ? "HIGH" : confidence >= 60 ? "MEDIUM" : "LOW");
+  document.getElementById("modalRO").textContent = e.ro || "—";
+  document.getElementById("modalCustomer").textContent = e.customer + " · " + e.stage;
   document.getElementById("infoGrid").innerHTML =
     '<div class="info-field"><label>Part Number</label><div class="val">' + (e.pn || "—") + '</div></div>' +
     '<div class="info-field"><label>Serial Number</label><div class="val">' + (e.sn || "—") + '</div></div>' +
@@ -399,15 +398,16 @@ var confidence = e.confidence !== undefined ? e.confidence : null;
     '<div class="info-field"><label>Date Received</label><div class="val">' + (e.date ? e.date.split(" ").slice(1, 4).join(" ") : "—") + '</div></div>' +
     '<div class="info-field"><label>Stage</label><div class="val">' + (e.stage || "—") + '</div></div>' +
     '<div class="info-field"><label>AI Confidence</label><div class="val" style="color:' + confColor + ';font-weight:500">' + confLabel + '</div></div>' +
-    '<div class="info-field" style="grid-column:1/-1"><label>Customer Contact</label><div class="val" style="font-size:12px;word-break:break-all">' + (e.from || "—") + (emailAddr ? '<br><span style="color:var(--accent);font-size:11px">' + emailAddr + '</span>' : '') + '</div></div>';  document.getElementById("stageSelect").value = e.stage || "Unclassified";
+    '<div class="info-field" style="grid-column:1/-1"><label>Customer Contact</label><div class="val" style="font-size:12px;word-break:break-all">' + (e.from || "—") + (emailAddr ? '<br><span style="color:var(--accent);font-size:11px">' + emailAddr + '</span>' : '') + '</div></div>';
+  document.getElementById("stageSelect").value = e.stage || "Unclassified";
   var dl = document.getElementById("docsList");
   if (e.docs && e.docs.length) {
     dl.innerHTML = e.docs.map(function(d) {
       return '<div class="doc-row">' +
-        '<div class="doc-name">📄 ' + d.name + '</div>' +
+        '<div class="doc-name">doc ' + d.name + '</div>' +
         '<div style="display:flex;gap:8px;align-items:center">' +
         '<div class="doc-tag">' + d.tag + '</div>' +
-        '<div class="doc-tag" style="border-color:var(--muted);color:var(--muted);cursor:default">VIEW</div>' +
+        '<div class="doc-tag" style="border-color:var(--muted);color:var(--muted)">VIEW</div>' +
         '</div></div>';
     }).join("");
   } else {
@@ -464,21 +464,14 @@ function sendMessage() {
   var box = document.getElementById("composeBox");
   var text = box.value.trim();
   if (!text || !currentRO) return;
-
   var toEmail = extractEmail(currentRO.from);
-  if (!toEmail) {
-    showToast("No customer email found");
-    return;
-  }
-
+  if (!toEmail) { showToast("No customer email found"); return; }
   var subject = "Re: " + (currentRO.ro || "Repair Order") + " — " + (currentRO.pn || "");
-
-emailjs.send("service_hzlvhwr", "template_cymee67", {
+  emailjs.send("service_hzlvhwr", "template_cymee67", {
     to_email: toEmail,
     subject: subject,
     message: text,
     reply_to: "example.mro.email@gmail.com"
-})
   }).then(function() {
     var thread = document.getElementById("thread");
     var now = new Date();
@@ -496,15 +489,12 @@ emailjs.send("service_hzlvhwr", "template_cymee67", {
 function draftWithAI() {
   var e = currentRO;
   if (!e) return;
-
   var box = document.getElementById("composeBox");
   box.value = "Drafting...";
   box.disabled = true;
-
   var threadText = (e.messages || []).map(function(m) {
     return (m.dir === "inbound" ? "CUSTOMER: " : "YOU: ") + m.body;
   }).join("\n\n---\n\n");
-
   fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -520,18 +510,19 @@ function draftWithAI() {
     box.value = data.content[0].text.trim();
     box.disabled = false;
   }).catch(function() {
-    var fallbacks = {
+    var stageDefaults = {
       "RFQ/capability request": "Dear " + e.customer + " team,\n\nThank you for your inquiry. We confirm capability on PN " + (e.pn || "the referenced part") + ". We will proceed with evaluation and provide a firm quotation following teardown and inspection.\n\nBest regards,\nExample MRO",
       "Part shipped": "Dear " + e.customer + " team,\n\nWe confirm receipt of PN " + (e.pn || "the part") + " SN " + (e.sn || "—") + " for RO " + (e.ro || "—") + ". Incoming inspection is underway.\n\nBest regards,\nExample MRO",
-      "Quote issued": "Dear " + e.customer + " team,\n\nPlease find our firm quotation attached for RO " + (e.ro || "—") + ". Valid 30 days. Please reply with written approval to proceed.\n\nBest regards,\nExample MRO",
-      "Quote approval": "Dear " + e.customer + " team,\n\nThank you for the approval. We will commence work on RO " + (e.ro || "—") + " immediately.\n\nBest regards,\nExample MRO",
-      "Repair complete": "Dear " + e.customer + " team,\n\nRO " + (e.ro || "—") + " is complete. FAA Form 8130-3 enclosed. Please confirm return shipping address.\n\nBest regards,\nExample MRO",
+      "Quote issued": "Dear " + e.customer + " team,\n\nFirm quotation for RO " + (e.ro || "—") + " attached. Valid 30 days. Please reply with written approval to proceed.\n\nBest regards,\nExample MRO",
+      "Quote approval": "Dear " + e.customer + " team,\n\nThank you for the approval. Work on RO " + (e.ro || "—") + " commences immediately.\n\nBest regards,\nExample MRO",
+      "Repair complete": "Dear " + e.customer + " team,\n\nRO " + (e.ro || "—") + " complete. FAA Form 8130-3 enclosed. Please confirm return shipping address.\n\nBest regards,\nExample MRO",
       "Unclassified": "Dear " + e.customer + " team,\n\nThank you for your message. Could you please provide more details so we can assist you correctly?\n\nBest regards,\nExample MRO"
     };
-    box.value = fallbacks[e.stage] || ("Dear " + e.customer + " team,\n\nUpdate regarding RO " + e.ro + ".\n\nBest regards,\nExample MRO");
+    box.value = stageDefaults[e.stage] || ("Dear " + e.customer + " team,\n\nUpdate regarding RO " + (e.ro || "—") + ".\n\nBest regards,\nExample MRO");
     box.disabled = false;
   });
 }
+
 renderCustomers();
 </script>
 
