@@ -16,6 +16,18 @@ def get_body(msg):
     return msg.get_payload(decode=True).decode(charset, errors="replace")
 
 
+def get_attachments(msg):
+    """Detect attachments and return list of names."""
+    attachments = []
+    if msg.is_multipart():
+        for part in msg.walk():
+            content_type = part.get_content_type()
+            filename = part.get_filename()
+            if filename and content_type != "text/plain" and content_type != "text/html":
+                attachments.append({"name": filename, "tag": "ATTACHED"})
+    return attachments
+
+
 def decode_field(value):
     if value is None:
         return ""
@@ -26,7 +38,6 @@ def decode_field(value):
 
 
 def normalize_ro(ro):
-    """Normalize RO number for consistent matching — strip prefix, uppercase."""
     if not ro:
         return None
     return str(ro).upper().replace("RO-","").replace("RO","").strip()
@@ -86,14 +97,15 @@ def main():
             fields["subject"]  = subject
             fields["body"]     = body[:500]
             fields["messages"] = [{"dir":"inbound","from":sender,"time":msg["Date"] or "","body":body[:500]}]
-            fields["docs"]     = []
+            fields["docs"]     = get_attachments(msg)
 
-            ro_raw       = fields.get("ro")
-            ro_norm      = normalize_ro(ro_raw)
-            customer     = fields.get("customer")
+            ro_raw  = fields.get("ro")
+            ro_norm = normalize_ro(ro_raw)
+            customer = fields.get("customer")
+
+            print(f"Attachments found: {fields['docs']}")
 
             if ro_norm and customer:
-                # search for existing document with same RO and customer
                 existing = db.collection("emails")\
                     .where("customer","==",customer)\
                     .limit(10).get()
@@ -106,7 +118,6 @@ def main():
                         break
 
                 if matched:
-                    # update existing thread — append message, update stage
                     new_message = {
                         "dir":  "inbound",
                         "from": sender,
@@ -118,14 +129,13 @@ def main():
                         "stage":    fields.get("stage","Unclassified"),
                         "summary":  fields.get("summary",""),
                         "date":     fields["date"],
+                        "docs":     fields["docs"],
                     })
-                    print(f"Updated thread: {customer} | {ro_raw} → {fields.get('stage')}")
+                    print(f"Updated thread: {customer} | {ro_raw}")
                 else:
-                    # new RO
                     ref = db.collection("emails").add(fields)
                     print(f"New RO saved: {customer} | {ro_raw} | {ref[1].id}")
             else:
-                # no RO extracted — save as new
                 ref = db.collection("emails").add(fields)
                 print(f"Saved (no RO): {customer} | {fields.get('stage')}")
 
