@@ -108,7 +108,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:0 3
 </head>
 <body>
 <header>
-  <div class="logo">NEXUM <span>MRO PORTAL</span></div>
+  <div style="display:flex;align-items:center;gap:20px">
+    <a href="../nexum-main-page/index.html" style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em;text-decoration:none;border:1px solid var(--border);padding:4px 10px;transition:color .2s,border-color .2s" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">← HOME</a>
+    <div class="logo">NEXUM <span>MRO PORTAL</span></div>
+  </div>
   <div class="breadcrumb" id="breadcrumb"><span class="crumb" onclick="goScreen(1)">Customers</span></div>
   <div class="live-badge"><div class="live-dot"></div>LIVE</div>
 </header>
